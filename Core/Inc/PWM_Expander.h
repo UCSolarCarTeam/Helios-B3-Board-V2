@@ -17,6 +17,10 @@ void PWM_I2C_READ_REGISTER(uint8_t address,uint8_t *buffer);
 void PWM_I2C_WRITE_REGISTER(uint8_t address,uint8_t value);
 void PWM_I2C_WRITE_REGISTER_BITWISE(uint8_t address,uint8_t mask,uint8_t value);
 
+void PCA9685_SetPWM(uint8_t channel, uint16_t value);
+void PCA9685_LED0_On(void);
+
+
 void PWM_I2C_RESET();
 void PWM_I2C_SLEEP_ENABLE();
 void PWM_I2C_SLEEP_DISABLE();

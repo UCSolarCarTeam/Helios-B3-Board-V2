@@ -32,6 +32,46 @@ void PWM_I2C_WRITE_REGISTER(uint8_t address, uint8_t value)
                       100U);
 }
 
+void PCA9685_LED0_On(void)
+{
+    uint8_t data = 0x10; // FULL ON
+    HAL_I2C_Mem_Write(&hi2c1,
+                      0x40 << 1,
+                      0x07,
+                      I2C_MEMADD_SIZE_8BIT,
+                      &data,
+                      1,
+                      200);
+
+    __NOP();
+}
+
+void PCA9685_SetPWM(uint8_t channel, uint16_t value)
+{
+    uint8_t data[4];
+    uint8_t reg = 0x06 + 4 * channel;  // LEDn_ON_L base
+
+    if (value > 4095) value = 4095;
+
+    // ON = 0
+    data[0] = 0x00;        // ON_L
+    data[1] = 0x00;        // ON_H
+
+    // OFF = value
+    data[2] = value & 0xFF;        // OFF_L
+    data[3] = (value >> 8) & 0x0F; // OFF_H
+
+    HAL_I2C_Mem_Write(
+        &hi2c1,
+        0x40 << 1,
+        reg,
+        I2C_MEMADD_SIZE_8BIT,
+        data,
+        4,
+        100
+    );
+}
+
 
 //void PCA9685_LED0_Off(void)
 //{

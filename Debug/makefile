@@ -60,8 +60,8 @@ all: main-build
 main-build: PWM_IC_TEST.elf secondary-outputs
 
 # Tool invocations
-PWM_IC_TEST.elf PWM_IC_TEST.map: $(OBJS) $(USER_OBJS) C:\Users\Karim\Documents\SCHOOL\Solar\ Car\ Club\PWM_TEST\PWM_IC_TEST\STM32L152RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "PWM_IC_TEST.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\Karim\Documents\SCHOOL\Solar Car Club\PWM_TEST\PWM_IC_TEST\STM32L152RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PWM_IC_TEST.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+PWM_IC_TEST.elf PWM_IC_TEST.map: $(OBJS) $(USER_OBJS) C:\Users\Karim\Documents\Github\Helios-B3-Board-V2\STM32L152RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "PWM_IC_TEST.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\Karim\Documents\Github\Helios-B3-Board-V2\STM32L152RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="PWM_IC_TEST.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
