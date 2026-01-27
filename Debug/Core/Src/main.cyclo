@@ -1,7 +1,0 @@
-../Core/Src/main.c:73:5:main	1
-../Core/Src/main.c:118:8:PWM_Test	2
-../Core/Src/main.c:136:6:SystemClock_Config	3
-../Core/Src/main.c:180:13:MX_I2C1_Init	2
-../Core/Src/main.c:215:13:MX_USART2_UART_Init	2
-../Core/Src/main.c:248:13:MX_GPIO_Init	1
-../Core/Src/main.c:290:6:Error_Handler	1

@@ -18,13 +18,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-//test
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "PWM_Expander.h"
 #include "PWM_Registers.h"
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -97,37 +95,37 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART2_UART_Init();
-
   /* USER CODE BEGIN 2 */
 
-  /* USER CODE END 2 */
+  //uint8_t test = 0;
 
+  uint8_t mode1 = 0x00;
+ 	  //HAL_I2C_Mem_Write(&hi2c1, 0x40 << 1, 0x00,
+ 	                    //I2C_MEMADD_SIZE_8BIT, &mode1, 1, 200);
+//
+  /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+
+//	  HAL_I2C_Mem_Write(&hi2c1, (0x40 << 1), 0x00, I2C_MEMADD_SIZE_8BIT, &test, 1, 200);
+
 	  PCA9685_LED0_On();
 	  HAL_Delay(500);
 
+//	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5); // D13
+//	  HAL_Delay(500);
 
-  }
+
     /* USER CODE END WHILE */
-}
-/* USER CODE BEGIN 3 */
-  void PWM_Test(void)
-  {
-      uint16_t levels[] = {0, 1024, 2048, 3072, 4095};
 
-      for (int i = 0; i < 5; i++)
-      {
-          PCA9685_SetPWM(0, levels[i]);
-          HAL_Delay(500);
-      }
+    /* USER CODE BEGIN 3 */
   }
-
-/* USER CODE END 3 */
-
+  /* USER CODE END 3 */
+}
 
 /**
   * @brief System Clock Configuration
@@ -196,8 +194,7 @@ static void MX_I2C1_Init(void)
   hi2c1.Init.OwnAddress2 = 0;
   hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
   hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-
-  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)ss
   {
     Error_Handler();
   }
@@ -280,6 +277,23 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+
+void PCA9685_LED0_On(void)
+{
+    uint8_t data = 0x10; // FULL ON
+    HAL_StatusTypeDef status = HAL_I2C_Mem_Write(&hi2c1,
+                      0x40 << 1,
+                      0x07,
+                      I2C_MEMADD_SIZE_8BIT,
+                      &data,
+                      1,
+                      200);
+
+    __NOP();
+}
+
+
 
 /* USER CODE END 4 */
 
