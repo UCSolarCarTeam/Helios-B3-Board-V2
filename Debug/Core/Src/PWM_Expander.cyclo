@@ -1,0 +1,2 @@
+../Core/Src/PWM_Expander.c:13:6:PWM_I2C_READ_REGISTER	1
+../Core/Src/PWM_Expander.c:24:6:PWM_I2C_WRITE_REGISTER	1
