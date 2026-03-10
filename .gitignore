@@ -1,0 +1,79 @@
+# ===== Eclipse / STM32CubeIDE project files =====
+.cproject
+.project
+.settings/
+.metadata/
+*.launch
+
+# ===== Build output directories =====
+Debug/
+Release/
+build/
+Build/
+
+# ===== Dependency / prerequisite files =====
+*.d
+
+# ===== Object files =====
+*.o
+*.ko
+*.obj
+
+# ===== Linker / build output =====
+*.elf
+*.hex
+*.map
+*.ilk
+*.exp
+
+# ===== Libraries =====
+*.lib
+*.a
+*.la
+*.lo
+
+# ===== Shared libraries =====
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# ===== Executables =====
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+
+# ===== Debug / symbol files =====
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# ===== Precompiled headers =====
+*.gch
+*.pch
+
+# ===== Kernel module build results =====
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+# ===== IDE / editor files =====
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===== OS-specific junk =====
+.DS_Store
+**/.DS_Store
+Thumbs.db
+
+# ===== Misc =====
+*.orig
