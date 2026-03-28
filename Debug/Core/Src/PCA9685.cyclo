@@ -1,0 +1,15 @@
+../Core/Inc/pca9685.h:61:23:PCA9685_ChannelOnL	1
+../Core/Inc/pca9685.h:62:23:PCA9685_ChannelOnH	1
+../Core/Inc/pca9685.h:64:23:PCA9685_ChannelOffH	1
+../Core/Src/PCA9685.c:12:26:wr8	1
+../Core/Src/PCA9685.c:16:19:rd8	1
+../Core/Src/PCA9685.c:20:26:wrN	1
+../Core/Src/PCA9685.c:26:19:PCA9685_Init	6
+../Core/Src/PCA9685.c:51:19:PCA9685_SoftwareReset	1
+../Core/Src/PCA9685.c:59:19:PCA9685_SetOutputMode	5
+../Core/Src/PCA9685.c:75:19:PCA9685_Sleep	5
+../Core/Src/PCA9685.c:93:19:PCA9685_SetPWMFreq	7
+../Core/Src/PCA9685.c:117:19:PCA9685_SetPWM	2
+../Core/Src/PCA9685.c:132:19:PCA9685_SetDuty	7
+../Core/Src/PCA9685.c:162:19:PCA9685_SetAllPWM	1
+../Core/Src/PCA9685.c:174:19:PCA9685_Restart	4
