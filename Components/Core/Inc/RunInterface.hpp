@@ -6,10 +6,16 @@
  * 
  */
 
-#ifndef C_RUN_IFACE_HPP_
-#define C_RUN_IFACE_HPP_
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void run_interface();
 void cpp_USART1_IRQHandler();
 
-# endif
+#ifdef __cplusplus
+}
+#endif
+

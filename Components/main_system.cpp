@@ -6,6 +6,7 @@
  ******************************************************************************
 */
 /* Includes -----------------------------------------------------------------*/
+#include "main_system.hpp"
 #include "SystemDefines.hpp"
 #include "UARTDriver.hpp"
 
@@ -15,7 +16,7 @@
 
 /* Drivers ------------------------------------------------------------------*/
 namespace Driver {
-    UARTDriver uart2(USART2);
+    UARTDriver uart1(USART1);
 }
 
 /* Interface Functions ------------------------------------------------------------*/
