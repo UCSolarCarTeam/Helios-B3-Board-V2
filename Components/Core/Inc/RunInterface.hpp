@@ -6,7 +6,8 @@
  * 
  */
 
-#pragma once
+#ifndef C_IFACE_HPP_
+#define C_IFACE_HPP_
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,3 +20,4 @@ void cpp_USART1_IRQHandler();
 }
 #endif
 
+#endif
