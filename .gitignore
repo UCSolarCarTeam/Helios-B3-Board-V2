@@ -1,6 +1,4 @@
 # ===== Eclipse / STM32CubeIDE project files =====
-.cproject
-.project
 .settings/
 .metadata/
 *.launch
