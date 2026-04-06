@@ -11,10 +11,13 @@
 /* Includes  ----------------------------------------------------------------------------*/
 #include "Mutex.hpp"
 // Board specific includes
+
 #include "stm32h5xx_hal.h"
 #include "stm32h5xx_ll_usart.h"
 #include "stm32h5xx_hal_rcc.h"
 #include "stm32h5xx_ll_dma.h"
+#include "stm32h563xx.h"
+
 
 /* Interface Functions ------------------------------------------------------------------*/
 /* These functions act as our program's 'main' and any functions inside CubeIDE's main --*/
@@ -27,13 +30,16 @@ void run_StartDefaultTask();
 /* All must be extern from main_system.cpp -------------------------------------------------*/
 
 /* Globally Accessible Drivers ------------------------------------------------------------------*/
-// UART Driver/
+
+/* UART Driver Instances ------------------------------------------------------------------*/
 class UARTDriver;
 namespace Driver {
     extern UARTDriver uart1;
 }
+
+/* UART Driver Aliases ------------------------------------------------------------------*/
 namespace UART {
-    constexpr UARTDriver* Debug = &Driver::uart1;
+	constexpr UARTDriver* Debug = &Driver::uart1;	// Debug UART
 }
 
 /* System Handles ------------------------------------------------------------------*/

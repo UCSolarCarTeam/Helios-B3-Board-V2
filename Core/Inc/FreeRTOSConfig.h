@@ -45,6 +45,16 @@
 
 /* USER CODE BEGIN Includes */
 /* Section where include file can be added */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern uint32_t SystemCoreClock;
+
+#ifdef __cplusplus
+}
+#endif
+
 /* USER CODE END Includes */
 
 /* Ensure definitions are only used by the compiler, and not by the assembler. */

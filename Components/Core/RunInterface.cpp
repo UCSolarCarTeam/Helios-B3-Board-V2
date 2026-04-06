@@ -9,16 +9,16 @@
 #include "UARTDriver.hpp"
 #include "RunInterface.hpp"
 
-extern "C" {
-    void run_interface()
-    {
-        run_main();
-    }
 
-    void cpp_USART1_IRQHandler()
-    {
-        Driver::uart1.HandleIRQ_UART();
-    }
+void run_interface()
+{
+	run_main();
 }
+
+//void cpp_USART1_IRQHandler()
+//{
+//	Driver::uart1.HandleIRQ_UART();
+//}
+
 
 
