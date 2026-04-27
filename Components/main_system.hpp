@@ -53,7 +53,4 @@ namespace SystemHandles {
     constexpr FDCAN_HandleTypeDef* FDCAN_Handle = &hfdcan2;
 }
 
-
-
-
 #endif /* MAIN_SYSTEM_HPP_ */

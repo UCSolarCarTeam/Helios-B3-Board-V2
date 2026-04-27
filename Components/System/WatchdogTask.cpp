@@ -6,6 +6,7 @@
 */
 #include "SystemDefines.hpp"
 #include "WatchdogTask.hpp"
+#include "LED.hpp"
 
 /* Macros/Enums ------------------------------------------------------------*/
 
@@ -61,8 +62,25 @@ void WatchdogTask::HandleCommand(Command& cm)
 void WatchdogTask::Run(void * pvParams)
 {
     uint32_t tempSecondCounter = 0;
+    LED::DB_WHITE::On();
 
     while (1) {
+
+    	// Toggle between 3 LEDs every second
+    	LED::DB_GREEN::Off();
+    	LED::DB_BLUE::Off();
+    	LED::DB_RED::Off();
+    	switch (tempSecondCounter % 3) {
+    	case 0:
+    		LED::DB_GREEN::On();
+    		break;
+    	case 1:
+    		LED::DB_GREEN::On();
+    		break;
+    	case 2:
+			LED::DB_GREEN::On();
+			break;
+    	}
 
     	osDelay(1000);
 
