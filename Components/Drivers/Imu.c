@@ -15,7 +15,7 @@
 
 
 I2C_HandleTypeDef hi2c1;
-extern UARTDriver uart1;
+extern Driver uart1;
 
 void who_am_i(void)
 {
