@@ -109,15 +109,7 @@ int main(void)
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-  // void PWM_Test(void)
-  // {
-  //   uint16_t levels[] = {0, 1024, 2048, 3072, 4095};
-  //   // for (int i = 0; i < 5; i++)
-  //   // {
-  //   //   PCA9685_SetPWM(0, levels[i]);
-  //   //   HAL_Delay(500);
-  //   // }
-  // }
+
   /* USER CODE END 3 */
 }
 

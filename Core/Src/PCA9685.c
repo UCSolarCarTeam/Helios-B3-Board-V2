@@ -5,7 +5,7 @@
  *      Author: jazebzafar
  */
 
-#include "pca9685.h"
+#include "PCA9685.h"
 #include <math.h>
 
 // ========== Internal helpers ==========
@@ -187,4 +187,110 @@ HAL_StatusTypeDef PCA9685_Restart(PCA9685_HandleTypeDef *hpca) {
     // Set RESTART=1 to kick PWM logic
     mode1 |= BIT(MODE1_RESTART_Pos);
     return wr8(hpca, PCA9685_MODE1, mode1);
+}
+
+// ========== PCA9685 Loop ==========
+
+#define PCA9685_TASK_FREQUENCY_HZ 5
+#define PCA9685_TASK_DELAY_MS     (1000 / PCA9685_TASK_FREQUENCY_HZ)
+
+void PCA9685_RunLoop(PCA9685_HandleTypeDef *hpca)
+{
+    if (!hpca) return;
+
+    // Replace these later with whatever each PCA9685 channel should actually do.
+    float led0Duty  = 0.0f;
+    float led1Duty  = 0.0f;
+    float led2Duty  = 0.0f;
+    float led3Duty  = 0.0f;
+    float led4Duty  = 0.0f;
+    float led5Duty  = 0.0f;
+    float led6Duty  = 0.0f;
+    float led7Duty  = 0.0f;
+    float led8Duty  = 0.0f;
+    float led9Duty  = 0.0f;
+    float led10Duty = 0.0f;
+    float led11Duty = 0.0f;
+    float led12Duty = 0.0f;
+    float led13Duty = 0.0f;
+    float led14Duty = 0.0f;
+    float led15Duty = 0.0f;
+
+    while (1)
+    {
+        for (uint8_t i = 0; i < 16; i++)
+        {
+            switch ((PCA9685_Channel)i)
+            {
+            case PCA9685_LED0:
+                PCA9685_SetDuty(hpca, PCA9685_LED0, led0Duty, 0);
+                break;
+
+            case PCA9685_LED1:
+                PCA9685_SetDuty(hpca, PCA9685_LED1, led1Duty, 0);
+                break;
+
+            case PCA9685_LED2:
+                PCA9685_SetDuty(hpca, PCA9685_LED2, led2Duty, 0);
+                break;
+
+            case PCA9685_LED3:
+                PCA9685_SetDuty(hpca, PCA9685_LED3, led3Duty, 0);
+                break;
+
+            case PCA9685_LED4:
+                PCA9685_SetDuty(hpca, PCA9685_LED4, led4Duty, 0);
+                break;
+
+            case PCA9685_LED5:
+                PCA9685_SetDuty(hpca, PCA9685_LED5, led5Duty, 0);
+                break;
+
+            case PCA9685_LED6:
+                PCA9685_SetDuty(hpca, PCA9685_LED6, led6Duty, 0);
+                break;
+
+            case PCA9685_LED7:
+                PCA9685_SetDuty(hpca, PCA9685_LED7, led7Duty, 0);
+                break;
+
+            case PCA9685_LED8:
+                PCA9685_SetDuty(hpca, PCA9685_LED8, led8Duty, 0);
+                break;
+
+            case PCA9685_LED9:
+                PCA9685_SetDuty(hpca, PCA9685_LED9, led9Duty, 0);
+                break;
+
+            case PCA9685_LED10:
+                PCA9685_SetDuty(hpca, PCA9685_LED10, led10Duty, 0);
+                break;
+
+            case PCA9685_LED11:
+                PCA9685_SetDuty(hpca, PCA9685_LED11, led11Duty, 0);
+                break;
+
+            case PCA9685_LED12:
+                PCA9685_SetDuty(hpca, PCA9685_LED12, led12Duty, 0);
+                break;
+
+            case PCA9685_LED13:
+                PCA9685_SetDuty(hpca, PCA9685_LED13, led13Duty, 0);
+                break;
+
+            case PCA9685_LED14:
+                PCA9685_SetDuty(hpca, PCA9685_LED14, led14Duty, 0);
+                break;
+
+            case PCA9685_LED15:
+                PCA9685_SetDuty(hpca, PCA9685_LED15, led15Duty, 0);
+                break;
+
+            default:
+                break;
+            }
+        }
+
+        HAL_Delay(PCA9685_TASK_DELAY_MS);
+    }
 }

@@ -73,6 +73,30 @@ typedef struct {
 } PCA9685_HandleTypeDef;
 
 // =========================
+// PCA9685 channels
+// =========================
+// Added so the while loop can use switch/case like the GPIO task.
+// These are PCA9685 output channels, not GPIO input pins.
+typedef enum {
+    PCA9685_LED0  = 0,
+    PCA9685_LED1  = 1,
+    PCA9685_LED2  = 2,
+    PCA9685_LED3  = 3,
+    PCA9685_LED4  = 4,
+    PCA9685_LED5  = 5,
+    PCA9685_LED6  = 6,
+    PCA9685_LED7  = 7,
+    PCA9685_LED8  = 8,
+    PCA9685_LED9  = 9,
+    PCA9685_LED10 = 10,
+    PCA9685_LED11 = 11,
+    PCA9685_LED12 = 12,
+    PCA9685_LED13 = 13,
+    PCA9685_LED14 = 14,
+    PCA9685_LED15 = 15
+} PCA9685_Channel;
+
+// =========================
 // Public API (matches your .c)
 // =========================
 HAL_StatusTypeDef PCA9685_Init(PCA9685_HandleTypeDef *hpca,
@@ -105,6 +129,11 @@ HAL_StatusTypeDef PCA9685_SetAllPWM(PCA9685_HandleTypeDef *hpca,
                                     uint16_t off_count);
 
 HAL_StatusTypeDef PCA9685_Restart(PCA9685_HandleTypeDef *hpca);
+
+// =========================
+// Added loop function
+// =========================
+void PCA9685_RunLoop(PCA9685_HandleTypeDef *hpca);
 
 #ifdef __cplusplus
 }
