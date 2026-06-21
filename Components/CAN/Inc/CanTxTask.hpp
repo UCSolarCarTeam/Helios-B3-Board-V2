@@ -14,7 +14,18 @@
 #include "Mutex.hpp"
 
 /* Macros/Enums ------------------------------------------------------------*/
-
+enum CANTX_COMMANDS {
+    TEST_COMMAND,
+    HEARTBEAT,
+    DIGITAL_INPUTS,
+    ANALOG_INPUTS,
+    LIGHTS_INPUTS,
+    LIGHTS_STATUS,
+    GPS,
+    MPU_ACCEL,
+    MPU_GYRO,
+    MPU_TEMP
+};
 
 /* Class ------------------------------------------------------------------*/
 class CANTxTask : public Task

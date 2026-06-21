@@ -67,25 +67,26 @@ void WatchdogTask::Run(void * pvParams)
     while (1) {
 
     	// Toggle between 3 LEDs every second
-    	LED::DB_GREEN::Off();
-    	LED::DB_BLUE::Off();
-    	LED::DB_RED::Off();
-    	switch (tempSecondCounter % 3) {
-    	case 0:
-    		LED::DB_GREEN::On();
-    		break;
-    	case 1:
-    		LED::DB_GREEN::On();
-    		break;
-    	case 2:
-			LED::DB_GREEN::On();
-			break;
-    	}
 
-    	osDelay(1000);
+//    	switch (tempSecondCounter % 3) {
+//    	case 0:
+//    		LED::DB_GREEN::On();
+//    		break;
+//    	case 1:
+//    		LED::DB_GREEN::On();
+//    		break;
+//    	case 2:
+//			LED::DB_GREEN::On();
+//			break;
+//    	}
+
+    	LED::DB_WHITE::Toggle();
+    	LED::DB_GREEN::Toggle();
+		LED::DB_BLUE::Toggle();
+		LED::DB_RED::Toggle();
+		osDelay(1000);
 
         Command cm;
-
         CUBE_PRINT(">> Run [%d] s\n", tempSecondCounter++);
 
         // Ingest the command queue, up to 5 commands
