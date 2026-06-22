@@ -1,5 +1,5 @@
 /**
-  ******************************************************************************
+******************************************************************************
   * @file           : SystemDefines.hpp
   * @brief          : Macros and wrappers
   ******************************************************************************
@@ -62,5 +62,15 @@ constexpr uint16_t CAN_TX_TASK_STACK_DEPTH_WORDS = 512;    // Size of the CAN Tx
 constexpr uint8_t CAN_RX_TASK_RTOS_PRIORITY = 2;            // Priority of the CAN Rx task
 constexpr uint8_t CAN_RX_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the CAN Rx task queue
 constexpr uint16_t CAN_RX_TASK_STACK_DEPTH_WORDS = 512;    // Size of the CAN Rx task stack
+
+// I2C PCA9685 TASK
+constexpr uint8_t PCA9685_TASK_RTOS_PRIORITY = 2;          // Priority of the PCA9685 task
+constexpr uint8_t PCA9685_TASK_QUEUE_DEPTH_OBJS = 10;      // Size of the PCA9685 task queue
+constexpr uint16_t PCA9685_TASK_STACK_DEPTH_WORDS = 512;   // Size of the PCA9685 task stack
+
+// I2C GNSSREAD TASK
+constexpr uint8_t GNSSREAD_TASK_RTOS_PRIORITY = 2;          // Priority of the GNSS read task
+constexpr uint8_t GNSSREAD_TASK_QUEUE_DEPTH_OBJS = 10;      // Size of the GNSS read task queue
+constexpr uint16_t GNSSREAD_TASK_STACK_DEPTH_WORDS = 512;   // Size of the GNSS read task stack
 
 #endif // CUBE_MAIN_SYSTEM_DEFINES_H

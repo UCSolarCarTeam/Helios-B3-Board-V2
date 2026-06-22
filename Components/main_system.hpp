@@ -48,9 +48,12 @@ namespace UART {
 extern CRC_HandleTypeDef hcrc;          // CRC - Hardware CRC System Handle
 extern FDCAN_HandleTypeDef hfdcan2;     // FDCAN2 - FDCAN Peripheral Handle
 
+
 namespace SystemHandles {
     constexpr CRC_HandleTypeDef* CRC_Handle = &hcrc;
     constexpr FDCAN_HandleTypeDef* FDCAN_Handle = &hfdcan2;
+
 }
+
 
 #endif /* MAIN_SYSTEM_HPP_ */
