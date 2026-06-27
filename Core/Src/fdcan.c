@@ -60,7 +60,33 @@ void MX_FDCAN2_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN FDCAN2_Init 2 */
+  FDCAN_FilterTypeDef sFilterConfig;
+  sFilterConfig.IdType = FDCAN_EXTENDED_ID;
+  sFilterConfig.FilterIndex = 0;
+  sFilterConfig.FilterType = FDCAN_FILTER_MASK;
+  sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+  sFilterConfig.FilterID1 = 0x00000000;
+  sFilterConfig.FilterID2 = 0x00000000;
+  
+  HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig);
+  if (HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig) != HAL_OK)
+  {
+    /* Filter configuration Error */
+    Error_Handler();
+  }
 
+  // Start CAN peripheral
+  if(HAL_FDCAN_Start(&hfdcan2)!= HAL_OK)
+  {
+   Error_Handler();
+  }
+
+  // Activate the notification for new data in FIFO0 for FDCAN2
+  if (HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0) != HAL_OK)
+  {
+    /* Notification Error */
+    Error_Handler();
+  }
   /* USER CODE END FDCAN2_Init 2 */
 
 }
