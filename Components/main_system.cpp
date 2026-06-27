@@ -17,6 +17,7 @@
 #include "WatchdogTask.hpp"
 #include "CanRxTask.hpp"
 #include "CanTxTask.hpp"
+#include "ImuReadTask.hpp"
 
 /* Drivers ------------------------------------------------------------------*/
 namespace Driver {
@@ -34,6 +35,7 @@ void run_main() {
     WatchdogTask::Inst().InitTask();
     CANRxTask::Inst().InitTask();
     CANTxTask::Inst().InitTask();
+    ImuReadTask::Inst().InitTask();
 
     // Print System Boot Info : Warning, don't queue more than 10 prints before scheduler starts
     CUBE_PRINT("\n-- CUBE SYSTEM --\n");
