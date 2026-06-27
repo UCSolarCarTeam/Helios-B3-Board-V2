@@ -207,7 +207,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
     PC2     ------> ADC2_INP12
     PC3     ------> ADC2_INP13
     */
-    GPIO_InitStruct.Pin = DC_ACCEL_P_Pin|DC_ACCEL_N_Pin;
+    GPIO_InitStruct.Pin = DC_ACCEL_N_Pin|DC_ACCEL_P_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -262,7 +262,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
     PC2     ------> ADC2_INP12
     PC3     ------> ADC2_INP13
     */
-    HAL_GPIO_DeInit(GPIOC, DC_ACCEL_P_Pin|DC_ACCEL_N_Pin);
+    HAL_GPIO_DeInit(GPIOC, DC_ACCEL_N_Pin|DC_ACCEL_P_Pin);
 
     /* ADC2 interrupt Deinit */
     HAL_NVIC_DisableIRQ(ADC2_IRQn);

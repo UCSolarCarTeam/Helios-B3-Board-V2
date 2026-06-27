@@ -11,8 +11,21 @@
 #ifndef DRIVERS_IMU_H_
 #define DRIVERS_IMU_H_
 
+#define IMU_ADDR (0x68 << 1)
+#define IMU_I2U_ADDR_68 (0x68 << 1) //adding bits for r/w
+#define IMU_I2U_ADDR_69 (0x69 << 1)
+#define WHO_AM_I_REG  0x75
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void who_am_i(void);
 void imu_init(void);
 void fifo_reset(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* DRIVERS_IMU_H_ */

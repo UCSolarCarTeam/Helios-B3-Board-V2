@@ -73,10 +73,10 @@ void Error_Handler(void);
 #define DC_BREAK_N_GPIO_Port GPIOC
 #define DC_BREAK_P_Pin GPIO_PIN_1
 #define DC_BREAK_P_GPIO_Port GPIOC
-#define DC_ACCEL_P_Pin GPIO_PIN_2
-#define DC_ACCEL_P_GPIO_Port GPIOC
-#define DC_ACCEL_N_Pin GPIO_PIN_3
+#define DC_ACCEL_N_Pin GPIO_PIN_2
 #define DC_ACCEL_N_GPIO_Port GPIOC
+#define DC_ACCEL_P_Pin GPIO_PIN_3
+#define DC_ACCEL_P_GPIO_Port GPIOC
 #define GNSS_nRESET_Pin GPIO_PIN_2
 #define GNSS_nRESET_GPIO_Port GPIOA
 #define GNSS_TIMEPULSE_Pin GPIO_PIN_3

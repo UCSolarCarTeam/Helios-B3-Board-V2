@@ -1,18 +1,13 @@
-/*
- * ImuReadTask.cpp
- *
- * Imu read task (.cpp): Retrieves accelerometer and gyro data from fifo.
- *
- */
+/**
+ ******************************************************************************
+ * File Name          : ImuReadTask.hpp
+ * Description        : Accesses IAM-20680HT to poll accelerometer, gyroscope, and temperature.
+ ******************************************************************************
+*/
 
 #include "ImuReadTask.hpp"
 #include "SystemDefines.hpp"
 #include "Imu.h"
-
-#define IMU_ADDR (0x68 << 1)
-#define IMU_I2U_ADDR_68 (0x68 << 1) //adding bits for r/w
-#define IMU_I2U_ADDR_69 (0x69 << 1)
-#define WHO_AM_I_REG  0x75
 
 /**
  * @brief Constructor for ImuReadTask
