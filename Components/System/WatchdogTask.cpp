@@ -4,7 +4,6 @@
  * Description        : Primary Watchdog task, default task for the system.
  ******************************************************************************
 */
-#include "SystemDefines.hpp"
 #include "WatchdogTask.hpp"
 #include "LED.hpp"
 

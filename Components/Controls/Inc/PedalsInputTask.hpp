@@ -26,8 +26,25 @@ public:
 protected:
     static void RunTask(void* pvParams) { PedalsInputTask::Inst().Run(pvParams); } // Static Task Interface, passes control to the instance Run();
     void Run(void * pvParams); // Main run code
-
     void HandleCommand(Command& cm);
+
+    // Pedal ADC Handlers
+    ADC_HandleTypeDef *haccel_ = nullptr;
+    ADC_HandleTypeDef *hregen_ = nullptr;
+    
+    // ADC DMA Buffers
+    uint16_t accelDmaBuffer[2];
+    uint16_t regenDmaBuffer[2]; 
+
+    // Raw ADC Values
+    uint16_t v_accelReading_P;
+    uint16_t v_accelReading_N;
+    uint16_t v_regenReading_P; 
+    uint16_t v_regenReading_N;
+
+    // Pedal Percentage Values
+    float accelPercentage;
+    float regenPercentage;
 
 private:
     // Private Functions

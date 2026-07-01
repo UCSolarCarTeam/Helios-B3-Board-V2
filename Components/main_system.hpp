@@ -19,7 +19,9 @@
 #include "stm32h5xx_ll_dma.h"
 #include "stm32h5xx_hal_fdcan.h"
 #include "stm32h5xx_hal_i2c.h"
-
+#include "stm32h5xx_hal_adc.h"
+#include "stm32h5xx_hal_adc_ex.h"
+#include "stm32h5xx_hal_tim.h"
 
 
 /* Interface Functions ------------------------------------------------------------------*/
@@ -51,7 +53,7 @@ extern FDCAN_HandleTypeDef hfdcan2;     // FDCAN2 - FDCAN Peripheral Handle
 extern I2C_HandleTypeDef hi2c2;         // I2C2 - I2C2 Peripheral Handle
 extern ADC_HandleTypeDef hadc1;         // HADC1 - ADC1 Peripheral Handle
 extern ADC_HandleTypeDef hadc2;         // HADC2 - ADC2 Peripheral Handle
-
+extern TIM_HandleTypeDef htim3;
 
 namespace SystemHandles {
     constexpr CRC_HandleTypeDef* CRC_Handle = &hcrc;
@@ -59,6 +61,7 @@ namespace SystemHandles {
     constexpr I2C_HandleTypeDef* I2C2_Handle = &hi2c2;
     constexpr ADC_HandleTypeDef* Regen_Handle = &hadc1;
     constexpr ADC_HandleTypeDef* Accel_Handle = &hadc2;
+    constexpr TIM_HandleTypeDef* ADC_Timer_Handle = &htim3;
 }
 
 #endif /* MAIN_SYSTEM_HPP_ */
