@@ -33,8 +33,8 @@ void run_main() {
     CubeTask::Inst().InitTask();
     DebugTask::Inst().InitTask();
     WatchdogTask::Inst().InitTask();
-    CANRxTask::Inst().InitTask();
-    CANTxTask::Inst().InitTask();
+//    CANRxTask::Inst().InitTask();
+//    CANTxTask::Inst().InitTask();
     ImuReadTask::Inst().InitTask();
 
     // Print System Boot Info : Warning, don't queue more than 10 prints before scheduler starts

@@ -18,6 +18,7 @@
 #include "stm32h5xx_hal_rcc.h"
 #include "stm32h5xx_ll_dma.h"
 #include "stm32h5xx_hal_fdcan.h"
+#include "stm32h5xx_hal_i2c.h"
 
 
 

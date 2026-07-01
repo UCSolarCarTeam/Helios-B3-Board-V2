@@ -11,6 +11,8 @@
 #ifndef DRIVERS_IMU_H_
 #define DRIVERS_IMU_H_
 
+#include "main.h"
+
 #define IMU_ADDR (0x68 << 1)
 #define IMU_I2U_ADDR_68 (0x68 << 1) //adding bits for r/w
 #define IMU_I2U_ADDR_69 (0x69 << 1)
@@ -20,9 +22,9 @@
 extern "C" {
 #endif
 
-void who_am_i(void);
-void imu_init(void);
-void fifo_reset(void);
+uint8_t who_am_i(I2C_HandleTypeDef* hi2c_);
+void imu_init(I2C_HandleTypeDef* hi2c_);
+void fifo_reset(I2C_HandleTypeDef* hi2c_);
 
 #ifdef __cplusplus
 }
