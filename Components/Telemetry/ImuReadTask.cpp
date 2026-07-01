@@ -12,14 +12,14 @@
 /**
  * @brief Constructor for ImuReadTask
  */
-ImuReadTaskTask::ImuReadTask() : Task(IMU_READ_TASK_QUEUE_DEPTH_OBJS)
+ImuReadTask::ImuReadTask() : Task(IMU_READ_TASK_QUEUE_DEPTH_OBJS)
 {
 }
 
 /**
  * @brief Initialize the ImuReadTask
  */
-void ImuReadTaskTask::InitTask()
+void ImuReadTask::InitTask()
 {
     // Make sure the task is not already initialized
     CUBE_ASSERT(rtTaskHandle == nullptr, "Cannot initialize ImuReadTask task twice");
@@ -47,8 +47,8 @@ void ImuReadTask::Run(void * pvParams)
     	uint8_t count_H, count_L;
     	uint16_t count;
 
-    	HAL_I2C_Mem_Read(I2C2_Handle, IMU_ADDR, 0x72, I2C_MEMADD_SIZE_8BIT, &count_H, 1, 100); //0x72 = fifo_countH
-    	HAL_I2C_Mem_Read(I2C2_Handle, IMU_ADDR, 0x73, I2C_MEMADD_SIZE_8BIT, &count_L, 1, 100); //0x73 = fifo countL
+    	HAL_I2C_Mem_Read(SystemHandles::I2C2_Handle, IMU_ADDR, 0x72, I2C_MEMADD_SIZE_8BIT, &count_H, 1, 100); //0x72 = fifo_countH
+    	HAL_I2C_Mem_Read(SystemHandles::I2C2_Handle, IMU_ADDR, 0x73, I2C_MEMADD_SIZE_8BIT, &count_L, 1, 100); //0x73 = fifo countL
 
     	count = (count_H << 8) | count_L;
     	CUBE_PRINT("FIFO count: %d\n", count);
@@ -63,7 +63,7 @@ void ImuReadTask::Run(void * pvParams)
     	if (count >= 12) //need atleast 12 bytes to start giving results for accel (59 to 64) and gyro (67 to 72)
     	{
     	    uint8_t buf[12];
-    	    HAL_I2C_Mem_Read(I2C2_Handle, IMU_ADDR, 0x74, I2C_MEMADD_SIZE_8BIT, buf, 12, 1000); //0x74 = to r/w from the fifo buf (contains sensor data reg 59-72)
+    	    HAL_I2C_Mem_Read(SystemHandles::I2C2_Handle, IMU_ADDR, 0x74, I2C_MEMADD_SIZE_8BIT, buf, 12, 1000); //0x74 = to r/w from the fifo buf (contains sensor data reg 59-72)
 
     	    int16_t ax = (buf[0] << 8) | buf[1];
     	    int16_t ay = (buf[2] << 8) | buf[3];
