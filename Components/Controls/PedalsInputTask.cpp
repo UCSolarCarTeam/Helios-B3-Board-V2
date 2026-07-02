@@ -44,8 +44,8 @@ void PedalsInputTask::Run(void * pvParams)
     HAL_StatusTypeDef statusR;
 
     // Calibrate ADCs
-    statusR = HAL_ADCEx_Calibration_Start(SystemHandles::Regen_Handle, ADC_SINGLE_ENDED);
-    statusA= HAL_ADCEx_Calibration_Start(SystemHandles::Accel_Handle, ADC_SINGLE_ENDED);
+    // statusR = HAL_ADCEx_Calibration_Start(SystemHandles::Regen_Handle, ADC_SINGLE_ENDED);
+    // statusA= HAL_ADCEx_Calibration_Start(SystemHandles::Accel_Handle, ADC_SINGLE_ENDED);
 
     //Start ADCs
     statusR = HAL_ADC_Start_DMA(SystemHandles::Regen_Handle, (uint32_t*)regenDmaBuffer, 2);
