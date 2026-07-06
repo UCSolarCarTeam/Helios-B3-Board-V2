@@ -62,10 +62,6 @@ void CANTxTask::HandleCommand(Command& cm) {
 
 	// Handle CAN message based on ID
 	switch (static_cast<CANTX_COMMANDS>(cm.GetTaskCommand())) {
-		case TEST_COMMAND:
-			CUBE_PRINT_CAN_MESSAGE(cm.GetTaskCommand(), cm.GetDataSize(), cm.GetDataPointer());
-			break;
-        
         case HEARTBEAT:
             break;
 
@@ -95,6 +91,7 @@ void CANTxTask::HandleCommand(Command& cm) {
 		
         default:
 			CUBE_PRINT("CANTxTask - Received Unsupported CAN Message {%X}\n", cm.GetTaskCommand());
+			// CUBE_PRINT_CAN_MESSAGE(cm.GetTaskCommand(), cm.GetDataSize(), cm.GetDataPointer());
 			break;
 	}
 }
