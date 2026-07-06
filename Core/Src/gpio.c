@@ -65,10 +65,13 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOE, H_GPIO_3_Pin|H_GPIO_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, PWMX_nOE_Pin|H_GPIO_1_Pin|H_GPIO_4_Pin|IOX_nRESET_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, PWMX_nOE_Pin|H_GPIO_1_Pin|H_GPIO_4_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(DB_LED_WHITE_GPIO_Port, DB_LED_WHITE_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(IOX_nRESET_GPIO_Port, IOX_nRESET_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pins : GNSS_nRESET_Pin H_ADC_1_Pin H_ADC_2_Pin */
   GPIO_InitStruct.Pin = GNSS_nRESET_Pin|H_ADC_1_Pin|H_ADC_2_Pin;
@@ -77,11 +80,11 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : GNSS_TIMEPULSE_Pin GNSS_INT_Pin */
-  GPIO_InitStruct.Pin = GNSS_TIMEPULSE_Pin|GNSS_INT_Pin;
+  /*Configure GPIO pin : GNSS_TIMEPULSE_Pin */
+  GPIO_InitStruct.Pin = GNSS_TIMEPULSE_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(GNSS_TIMEPULSE_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : DB_LED_BLUE_Pin DB_LED_RED_Pin DB_LED_GREEN_Pin BOOT1_Pin */
   GPIO_InitStruct.Pin = DB_LED_BLUE_Pin|DB_LED_RED_Pin|DB_LED_GREEN_Pin|BOOT1_Pin;
@@ -103,8 +106,8 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PWMX_nOE_Pin H_GPIO_1_Pin H_GPIO_4_Pin IOX_nRESET_Pin */
-  GPIO_InitStruct.Pin = PWMX_nOE_Pin|H_GPIO_1_Pin|H_GPIO_4_Pin|IOX_nRESET_Pin;
+  /*Configure GPIO pins : PWMX_nOE_Pin H_GPIO_1_Pin H_GPIO_4_Pin */
+  GPIO_InitStruct.Pin = PWMX_nOE_Pin|H_GPIO_1_Pin|H_GPIO_4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -117,11 +120,18 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(DB_LED_WHITE_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : IOX_INTA_Pin */
-  GPIO_InitStruct.Pin = IOX_INTA_Pin;
+  /*Configure GPIO pin : IOX_nRESET_Pin */
+  GPIO_InitStruct.Pin = IOX_nRESET_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(IOX_nRESET_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : IOX_INTB_Pin IOX_INTA_Pin */
+  GPIO_InitStruct.Pin = IOX_INTB_Pin|IOX_INTA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(IOX_INTA_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
 }
 
