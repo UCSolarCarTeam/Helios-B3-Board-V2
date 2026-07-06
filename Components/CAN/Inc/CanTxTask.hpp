@@ -15,7 +15,6 @@
 
 /* Macros/Enums ------------------------------------------------------------*/
 enum CANTX_COMMANDS {
-    TEST_COMMAND,
     HEARTBEAT,
     DIGITAL_INPUTS,
     ANALOG_INPUTS,

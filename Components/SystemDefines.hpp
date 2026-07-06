@@ -63,4 +63,14 @@ constexpr uint8_t CAN_RX_TASK_RTOS_PRIORITY = 2;            // Priority of the C
 constexpr uint8_t CAN_RX_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the CAN Rx task queue
 constexpr uint16_t CAN_RX_TASK_STACK_DEPTH_WORDS = 512;    // Size of the CAN Rx task stack
 
+// IMU READ TASK TASK
+constexpr uint8_t IMU_READ_TASK_RTOS_PRIORITY = 2;       // Priority of the IMU Read Task
+constexpr uint8_t IMU_READ_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the IMU Read Task queue
+constexpr uint16_t IMU_READ_TASK_STACK_DEPTH_WORDS = 512;    // Size of the IMU Read Task stack
+
+// PEDALS INPUT TASK 
+constexpr uint8_t PEDALS_INPUT_TASK_RTOS_PRIORITY = 2;       // Priority of the Pedals Input Task
+constexpr uint8_t PEDALS_INPUT_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the Pedals Input Task queue
+constexpr uint16_t PEDALS_INPUT_TASK_STACK_DEPTH_WORDS = 512;    // Size of the Pedals Input Task stack
+
 #endif // CUBE_MAIN_SYSTEM_DEFINES_H
