@@ -9,11 +9,14 @@
 #include "main_system.hpp"
 #include "SystemDefines.hpp"
 #include "UARTDriver.hpp"
+#include "LED.hpp"
 
 // Tasks
 #include "CubeTask.hpp"
 #include "DebugTask.hpp"
 #include "WatchdogTask.hpp"
+#include "CanRxTask.hpp"
+#include "CanTxTask.hpp"
 
 /* Drivers ------------------------------------------------------------------*/
 namespace Driver {
@@ -29,7 +32,8 @@ void run_main() {
     CubeTask::Inst().InitTask();
     DebugTask::Inst().InitTask();
     WatchdogTask::Inst().InitTask();
-
+    CANRxTask::Inst().InitTask();
+    CANTxTask::Inst().InitTask();
 
     // Print System Boot Info : Warning, don't queue more than 10 prints before scheduler starts
     CUBE_PRINT("\n-- CUBE SYSTEM --\n");

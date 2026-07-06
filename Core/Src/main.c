@@ -107,6 +107,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_CRC_Init();
   /* USER CODE BEGIN 2 */
+  osKernelInitialize();
   run_interface();
 #if 0
   /* USER CODE END 2 */

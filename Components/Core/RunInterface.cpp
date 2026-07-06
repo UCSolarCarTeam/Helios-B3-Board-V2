@@ -15,10 +15,10 @@ void run_interface()
 	run_main();
 }
 
-//void cpp_USART1_IRQHandler()
-//{
-//	Driver::uart1.HandleIRQ_UART();
-//}
+void cpp_USART1_IRQHandler()
+{
+	Driver::uart1.HandleIRQ_UART();
+}
 
 
 

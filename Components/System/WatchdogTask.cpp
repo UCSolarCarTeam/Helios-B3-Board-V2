@@ -6,6 +6,7 @@
 */
 #include "SystemDefines.hpp"
 #include "WatchdogTask.hpp"
+#include "LED.hpp"
 
 /* Macros/Enums ------------------------------------------------------------*/
 
@@ -61,13 +62,31 @@ void WatchdogTask::HandleCommand(Command& cm)
 void WatchdogTask::Run(void * pvParams)
 {
     uint32_t tempSecondCounter = 0;
+    LED::DB_WHITE::On();
 
     while (1) {
 
-    	osDelay(1000);
+    	// Toggle between 3 LEDs every second
+
+//    	switch (tempSecondCounter % 3) {
+//    	case 0:
+//    		LED::DB_GREEN::On();
+//    		break;
+//    	case 1:
+//    		LED::DB_GREEN::On();
+//    		break;
+//    	case 2:
+//			LED::DB_GREEN::On();
+//			break;
+//    	}
+
+    	LED::DB_WHITE::Toggle();
+    	LED::DB_GREEN::Toggle();
+		LED::DB_BLUE::Toggle();
+		LED::DB_RED::Toggle();
+		osDelay(1000);
 
         Command cm;
-
         CUBE_PRINT(">> Run [%d] s\n", tempSecondCounter++);
 
         // Ingest the command queue, up to 5 commands

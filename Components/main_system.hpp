@@ -12,11 +12,13 @@
 #include "Mutex.hpp"
 // Board specific includes
 
+#include "stm32h563xx.h"
 #include "stm32h5xx_hal.h"
 #include "stm32h5xx_ll_usart.h"
 #include "stm32h5xx_hal_rcc.h"
 #include "stm32h5xx_ll_dma.h"
-#include "stm32h563xx.h"
+#include "stm32h5xx_hal_fdcan.h"
+
 
 
 /* Interface Functions ------------------------------------------------------------------*/
@@ -43,12 +45,12 @@ namespace UART {
 }
 
 /* System Handles ------------------------------------------------------------------*/
-extern CRC_HandleTypeDef hcrc;       // CRC - Hardware CRC System Handle
+extern CRC_HandleTypeDef hcrc;          // CRC - Hardware CRC System Handle
+extern FDCAN_HandleTypeDef hfdcan2;     // FDCAN2 - FDCAN Peripheral Handle
 
 namespace SystemHandles {
     constexpr CRC_HandleTypeDef* CRC_Handle = &hcrc;
+    constexpr FDCAN_HandleTypeDef* FDCAN_Handle = &hfdcan2;
 }
-
-
 
 #endif /* MAIN_SYSTEM_HPP_ */
