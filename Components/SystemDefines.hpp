@@ -73,4 +73,9 @@ constexpr uint8_t PEDALS_INPUT_TASK_RTOS_PRIORITY = 2;       // Priority of the 
 constexpr uint8_t PEDALS_INPUT_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the Pedals Input Task queue
 constexpr uint16_t PEDALS_INPUT_TASK_STACK_DEPTH_WORDS = 512;    // Size of the Pedals Input Task stack
 
+// DIGITALINPUT TASK
+constexpr uint8_t DIGITAL_INPUTS_TASK_RTOS_PRIORITY = 2;       // Priority of the Digital Input Task
+constexpr uint8_t DIGITAL_INPUTS_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the Digital Input Task queue
+constexpr uint16_t DIGITAL_INPUTS_TASK_STACK_DEPTH_WORDS = 512;    // Size of the Digital Input Task stack
+
 #endif // CUBE_MAIN_SYSTEM_DEFINES_H

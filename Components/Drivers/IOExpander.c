@@ -11,19 +11,15 @@
 #define I2C_TIMEOUT_MS 1000
 
 // ---------------- Internal State -----------------
-static I2C_HandleTypeDef *hi2c_ = NULL;
-static uint8_t dev_ = NULL;
-
 static uint8_t last_write[2] = {0xFF, 0xFF};
 static uint8_t pending_write[2] = {0xFF, 0xFF};
 static uint8_t last_read[2] = {0xFF, 0xFF};
 
-
 // ----------------- Low-level I2C Access -----------------
 
 // Write a buffer into sequential registers
-static bool IOE_WriteBuf(uint8_t dest, uint8_t* data, uint16_t size) {
-	if ( HAL_I2C_Mem_Write(hi2c_, dev_, dest, I2C_MEMADD_SIZE_8BIT, data, size, I2C_TIMEOUT_MS) == HAL_OK) {
+static bool IOE_WriteBuf(MCP23017_HandleTypeDef* hiox, uint8_t dest, uint8_t* data, uint16_t size) {
+	if ( HAL_I2C_Mem_Write(hiox->hi2c, (hiox->addr) << 1, dest, I2C_MEMADD_SIZE_8BIT, data, size, I2C_TIMEOUT_MS) == HAL_OK) {
 		return true;
 	}
 	return false;
@@ -31,17 +27,17 @@ static bool IOE_WriteBuf(uint8_t dest, uint8_t* data, uint16_t size) {
 }
 
 // Read a buffer from sequential registers
-static bool IOE_ReadBuf(uint8_t dest, uint8_t* data, uint16_t size) {
-    if (HAL_I2C_Mem_Read(hi2c_, dev_, dest, I2C_MEMADD_SIZE_8BIT, data, size, I2C_TIMEOUT_MS) == HAL_OK) {
+static bool IOE_ReadBuf(MCP23017_HandleTypeDef* hiox, uint8_t dest, uint8_t* data, uint16_t size) {
+    if (HAL_I2C_Mem_Read(hiox->hi2c, (hiox->addr) << 1, dest, I2C_MEMADD_SIZE_8BIT, data, size, I2C_TIMEOUT_MS) == HAL_OK) {
 		return true;
 	}
 	return false;
 }
 
 // Write a value into a single register
-static bool IOE_WriteReg(uint8_t dest, uint8_t data) {
+static bool IOE_WriteReg(MCP23017_HandleTypeDef* hiox, uint8_t dest, uint8_t data) {
 	uint8_t temp = data;
-	if ( HAL_I2C_Mem_Write(hi2c_, dev_ << 1, dest, I2C_MEMADD_SIZE_8BIT, &temp, 1, I2C_TIMEOUT_MS) == HAL_OK) {
+	if ( HAL_I2C_Mem_Write(hiox->hi2c, (hiox->addr) << 1, dest, I2C_MEMADD_SIZE_8BIT, &temp, 1, I2C_TIMEOUT_MS) == HAL_OK) {
 		return true;
 	}
 	return false;
@@ -49,29 +45,24 @@ static bool IOE_WriteReg(uint8_t dest, uint8_t data) {
 }
 
 // Read a value from a single register
-static bool IOE_ReadReg(uint8_t dest, uint8_t* data) {
+static bool IOE_ReadReg(MCP23017_HandleTypeDef* hiox, uint8_t dest, uint8_t* data) {
 	uint8_t temp = data;
-    if (HAL_I2C_Mem_Read(hi2c_, dev_ << 1, dest, I2C_MEMADD_SIZE_8BIT, &temp, 1, I2C_TIMEOUT_MS) == HAL_OK) {
+    if (HAL_I2C_Mem_Read(hiox->hi2c, (hiox->addr) << 1, dest, I2C_MEMADD_SIZE_8BIT, &temp, 1, I2C_TIMEOUT_MS) == HAL_OK) {
 		return true;
 	}
 	return false;
 }
 
 // ----------------- Public API -----------------
-void IOE_Init(I2C_HandleTypeDef *hi2c, uint8_t dev) {
-    // Save I2C peripheral handler and address
-    hi2c_ = hi2c;
-    dev_ = dev;
+void IOE_Init(MCP23017_HandleTypeDef* hiox) {
 
     // Configure Port A and Port B as inputs
-    IOE_WriteReg(IODIRA, 0xFF);
-    IOE_WriteReg(IODIRB, 0xFF);
+    IOE_WriteReg(hiox, IODIRA, 0xFF);
+    IOE_WriteReg(hiox, IODIRB, 0xFF);
 
     // Inverse Pin polarity
-//    IOE_WriteReg(IPOLA, 0xFF);
-//    IOE_WriteReg(IPOLB, 0xFF);
-
-
+//    IOE_WriteReg(hiox, IPOLA, 0xFF);
+//    IOE_WriteReg(hiox, IPOLB, 0xFF);
 
     // Initialize internal state to 0
     last_write[0] = last_write[1] = 0x00;
@@ -91,9 +82,9 @@ bool IOE_SetPin(IOExpanderPin pin, IOState state) {
     return true;
 }
 
-bool IOE_SetPinNow(IOExpanderPin pin, IOState state) {
+bool IOE_SetPinNow(MCP23017_HandleTypeDef* hiox, IOExpanderPin pin, IOState state) {
     IOE_SetPin(pin, state);
-    return IOE_Commit();
+    return IOE_Commit(hiox);
 }
 
 bool IOE_TogglePin(IOExpanderPin pin) {
@@ -103,14 +94,14 @@ bool IOE_TogglePin(IOExpanderPin pin) {
     return true;
 }
 
-bool IOE_TogglePinNow(IOExpanderPin pin) {
+bool IOE_TogglePinNow(MCP23017_HandleTypeDef* hiox, IOExpanderPin pin) {
     IOE_TogglePin(pin);
-    return IOE_Commit();
+    return IOE_Commit(hiox);
 }
 
-bool IOE_Commit(void) {
-    IOE_WriteReg(GPIOA, pending_write[0]);
-    IOE_WriteReg(GPIOB, pending_write[1]);
+bool IOE_Commit(MCP23017_HandleTypeDef* hiox) {
+    IOE_WriteReg(hiox, IOXA, pending_write[0]);
+    IOE_WriteReg(hiox, IOXB, pending_write[1]);
 
     last_write[0] = pending_write[0];
     last_write[1] = pending_write[1];
@@ -118,9 +109,9 @@ bool IOE_Commit(void) {
     return true;
 }
 
-bool IOE_Update(void) {
-	IOE_ReadReg(GPIOA, &last_read[0]);
-	IOE_ReadReg(GPIOB, &last_read[1]);
+bool IOE_Update(MCP23017_HandleTypeDef* hiox) {
+	IOE_ReadReg(hiox, IOXA, &last_read[0]);
+	IOE_ReadReg(hiox, IOXB, &last_read[1]);
     return true;
 }
 
@@ -130,7 +121,7 @@ IOState IOE_GetPinState(IOExpanderPin pin) {
     return (last_read[port] & (1 << bit)) ? IOE_HIGH : IOE_LOW;
 }
 
-IOState IOE_GetPinStateNow(IOExpanderPin pin) {
-    IOE_Update();
+IOState IOE_GetPinStateNow(MCP23017_HandleTypeDef* hiox, IOExpanderPin pin) {
+    IOE_Update(hiox);
     return IOE_GetPinState(pin);
 }
