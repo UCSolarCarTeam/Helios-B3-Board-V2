@@ -16,7 +16,9 @@
 #include "DebugTask.hpp"
 #include "WatchdogTask.hpp"
 #include "CanRxTask.hpp"
-#include "GnssReadTask.hpp"
+#include "CanTxTask.hpp"
+#include "ImuReadTask.hpp"
+#include "PedalsInputTask.hpp"
 
 /* Drivers ------------------------------------------------------------------*/
 namespace Driver {
@@ -32,9 +34,10 @@ void run_main() {
     CubeTask::Inst().InitTask();
     DebugTask::Inst().InitTask();
     WatchdogTask::Inst().InitTask();
-    //CANRxTask::Inst().InitTask();
-    GnssReadTask::Inst().InitTask();
-
+//    CANRxTask::Inst().InitTask();
+//    CANTxTask::Inst().InitTask();
+//    ImuReadTask::Inst().InitTask();
+    PedalsInputTask::Inst().InitTask();
 
     // Print System Boot Info : Warning, don't queue more than 10 prints before scheduler starts
     CUBE_PRINT("\n-- CUBE SYSTEM --\n");

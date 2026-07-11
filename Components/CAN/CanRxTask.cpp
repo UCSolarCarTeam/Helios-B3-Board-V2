@@ -9,7 +9,6 @@
 #include "CanRxTask.hpp"
 #include "stm32h5xx_hal_fdcan.h"
 
-
 /**
  * @brief Constructor for CANRxTask
  */
@@ -63,7 +62,7 @@ void CANRxTask::Run(void* pvParams) {
 void CANRxTask::HandleCommand(Command& cm) {
 
 	// Handle CAN message based on ID
-	switch (cm.GetTaskCommand()) {
+	switch (static_cast<CANRX_COMMANDS>(cm.GetTaskCommand())) {
 		case TEST_COMMAND:
 			CUBE_PRINT_CAN_MESSAGE(cm.GetTaskCommand(), cm.GetDataSize(), cm.GetDataPointer());
 			break;
@@ -94,6 +93,8 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef *hfdcan, uint32_t RxFifo0ITs)
         Command msg = Command(TASK_SPECIFIC_COMMAND, taskCommand);
         msg.CopyDataToCommand(data, header.DataLength);
         CANRxTask::Inst().GetEventQueue()->SendFromISR(msg);
+
+        CUBE_PRINT_CAN_MESSAGE(header.Identifier, header.DataLength, data);
             
     }
 
