@@ -55,6 +55,7 @@ extern ADC_HandleTypeDef hadc1;         // HADC1 - ADC1 Peripheral Handle
 extern ADC_HandleTypeDef hadc2;         // HADC2 - ADC2 Peripheral Handle
 extern TIM_HandleTypeDef htim3;
 
+
 namespace SystemHandles {
     constexpr CRC_HandleTypeDef* CRC_Handle = &hcrc;
     constexpr FDCAN_HandleTypeDef* FDCAN_Handle = &hfdcan2;
@@ -63,5 +64,6 @@ namespace SystemHandles {
     constexpr ADC_HandleTypeDef* Accel_Handle = &hadc2;
     constexpr TIM_HandleTypeDef* ADC_Timer_Handle = &htim3;
 }
+
 
 #endif /* MAIN_SYSTEM_HPP_ */
