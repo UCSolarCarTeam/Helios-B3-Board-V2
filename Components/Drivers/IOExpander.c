@@ -12,7 +12,7 @@
 
 // ---------------- Internal State -----------------
 static I2C_HandleTypeDef *hi2c_ = NULL;
-static uint8_t dev_ = NULL;
+static uint8_t dev_ = 0;
 
 static uint8_t last_write[2] = {0xFF, 0xFF};
 static uint8_t pending_write[2] = {0xFF, 0xFF};
@@ -50,7 +50,7 @@ static bool IOE_WriteReg(uint8_t dest, uint8_t data) {
 
 // Read a value from a single register
 static bool IOE_ReadReg(uint8_t dest, uint8_t* data) {
-	uint8_t temp = data;
+	uint8_t temp = 0;
     if (HAL_I2C_Mem_Read(hi2c_, dev_ << 1, dest, I2C_MEMADD_SIZE_8BIT, &temp, 1, I2C_TIMEOUT_MS) == HAL_OK) {
 		return true;
 	}

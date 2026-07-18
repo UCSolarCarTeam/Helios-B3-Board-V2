@@ -10,15 +10,15 @@
 
 // ========== Internal helpers ==========
 static HAL_StatusTypeDef wr8(PCA9685_HandleTypeDef *hpca, uint8_t reg, uint8_t val) {
-    return HAL_I2C_Mem_Write(hpca->i2c, (hpca->addr7 << 1), reg, I2C_MEMADD_SIZE_8BIT, &val, 1, 100);
+    return HAL_I2C_Mem_Write(hpca->i2c, hpca->addr7, reg, I2C_MEMADD_SIZE_8BIT, &val, 1, 100);
 }
 
 HAL_StatusTypeDef rd8(PCA9685_HandleTypeDef *hpca, uint8_t reg, uint8_t *val) {
-    return HAL_I2C_Mem_Read(hpca->i2c, (hpca->addr7 << 1) | 0x01, reg, I2C_MEMADD_SIZE_8BIT, val, 1, 100);
+    return HAL_I2C_Mem_Read(hpca->i2c, hpca->addr7, reg, I2C_MEMADD_SIZE_8BIT, val, 1, 100);
 }
 
 static HAL_StatusTypeDef wrN(PCA9685_HandleTypeDef *hpca, uint8_t start_reg, const uint8_t *buf, uint16_t len) {
-    return HAL_I2C_Mem_Write(hpca->i2c, (hpca->addr7 << 1), start_reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)buf, len,100);
+    return HAL_I2C_Mem_Write(hpca->i2c, hpca->addr7, start_reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*)buf, len,100);
 }
 
 // ========== Public API ==========

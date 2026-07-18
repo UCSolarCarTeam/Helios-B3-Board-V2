@@ -51,6 +51,7 @@ namespace UART {
 extern CRC_HandleTypeDef hcrc;          // CRC - Hardware CRC System Handle
 extern FDCAN_HandleTypeDef hfdcan2;     // FDCAN2 - FDCAN Peripheral Handle
 extern I2C_HandleTypeDef hi2c2;         // I2C2 - I2C2 Peripheral Handle
+extern I2C_HandleTypeDef hi2c3;
 extern ADC_HandleTypeDef hadc1;         // HADC1 - ADC1 Peripheral Handle
 extern ADC_HandleTypeDef hadc2;         // HADC2 - ADC2 Peripheral Handle
 extern TIM_HandleTypeDef htim3;
@@ -60,6 +61,7 @@ namespace SystemHandles {
     constexpr CRC_HandleTypeDef* CRC_Handle = &hcrc;
     constexpr FDCAN_HandleTypeDef* FDCAN_Handle = &hfdcan2;
     constexpr I2C_HandleTypeDef* I2C2_Handle = &hi2c2;
+    constexpr I2C_HandleTypeDef* PWMX_Handle = &hi2c3;
     constexpr ADC_HandleTypeDef* Regen_Handle = &hadc1;
     constexpr ADC_HandleTypeDef* Accel_Handle = &hadc2;
     constexpr TIM_HandleTypeDef* ADC_Timer_Handle = &htim3;
