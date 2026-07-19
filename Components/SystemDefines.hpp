@@ -1,5 +1,5 @@
 /**
-  ******************************************************************************
+******************************************************************************
   * @file           : SystemDefines.hpp
   * @brief          : Macros and wrappers
   ******************************************************************************
@@ -39,27 +39,27 @@ enum GLOBAL_COMMANDS : uint8_t
 /* - Lower priority number means lower priority task ---------------------------------*/
 
 // WATCHDOG TASK
-constexpr uint8_t WATCHDOG_TASK_RTOS_PRIORITY = 2;            // Priority of the watchdog task
+constexpr uint8_t WATCHDOG_TASK_RTOS_PRIORITY = 5;            // Priority of the watchdog task
 constexpr uint8_t WATCHDOG_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the watchdog task queue
 constexpr uint16_t WATCHDOG_TASK_STACK_DEPTH_WORDS = 512;    // Size of the watchdog task stack
 
 // UART TASK
-constexpr uint8_t UART_TASK_RTOS_PRIORITY = 2;            // Priority of the uart task
+constexpr uint8_t UART_TASK_RTOS_PRIORITY = 1;            // Priority of the uart task
 constexpr uint8_t UART_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the uart task queue
 constexpr uint16_t UART_TASK_STACK_DEPTH_WORDS = 512;    // Size of the uart task stack
 
 // DEBUG TASK
-constexpr uint8_t TASK_DEBUG_PRIORITY = 2;            // Priority of the debug task
+constexpr uint8_t TASK_DEBUG_PRIORITY = 1;            // Priority of the debug task
 constexpr uint8_t TASK_DEBUG_QUEUE_DEPTH_OBJS = 10;        // Size of the debug task queue
 constexpr uint16_t TASK_DEBUG_STACK_DEPTH_WORDS = 512;        // Size of the debug task stack
 
 // CAN TX TASK
-constexpr uint8_t CAN_TX_TASK_RTOS_PRIORITY = 2;            // Priority of the CAN Tx task
+constexpr uint8_t CAN_TX_TASK_RTOS_PRIORITY = 3;            // Priority of the CAN Tx task
 constexpr uint8_t CAN_TX_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the CAN Tx task queue
 constexpr uint16_t CAN_TX_TASK_STACK_DEPTH_WORDS = 512;    // Size of the CAN Tx task stack
 
 // CAN RX TASK
-constexpr uint8_t CAN_RX_TASK_RTOS_PRIORITY = 2;            // Priority of the CAN Rx task
+constexpr uint8_t CAN_RX_TASK_RTOS_PRIORITY = 4;            // Priority of the CAN Rx task
 constexpr uint8_t CAN_RX_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the CAN Rx task queue
 constexpr uint16_t CAN_RX_TASK_STACK_DEPTH_WORDS = 512;    // Size of the CAN Rx task stack
 
@@ -69,8 +69,23 @@ constexpr uint8_t IMU_READ_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the IMU
 constexpr uint16_t IMU_READ_TASK_STACK_DEPTH_WORDS = 512;    // Size of the IMU Read Task stack
 
 // PEDALS INPUT TASK 
-constexpr uint8_t PEDALS_INPUT_TASK_RTOS_PRIORITY = 2;       // Priority of the Pedals Input Task
+constexpr uint8_t PEDALS_INPUT_TASK_RTOS_PRIORITY = 3;       // Priority of the Pedals Input Task
 constexpr uint8_t PEDALS_INPUT_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the Pedals Input Task queue
 constexpr uint16_t PEDALS_INPUT_TASK_STACK_DEPTH_WORDS = 512;    // Size of the Pedals Input Task stack
+
+// PCA9685 / LIGHTS OUTPUT TASK
+constexpr uint8_t PCA9685_TASK_RTOS_PRIORITY = 2;
+constexpr uint8_t PCA9685_TASK_QUEUE_DEPTH_OBJS = 10;
+constexpr uint16_t PCA9685_TASK_STACK_DEPTH_WORDS = 512;
+
+// PCA9685 / LIGHTS OUTPUT TASK
+constexpr uint8_t GNSSREAD_TASK_RTOS_PRIORITY = 2;
+constexpr uint8_t GNSSREAD_TASK_QUEUE_DEPTH_OBJS = 10;
+constexpr uint16_t GNSSREAD_TASK_STACK_DEPTH_WORDS = 512;
+
+// DIGITALINPUT TASK
+constexpr uint8_t DIGITAL_INPUTS_TASK_RTOS_PRIORITY = 3;       // Priority of the Digital Input Task
+constexpr uint8_t DIGITAL_INPUTS_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the Digital Input Task queue
+constexpr uint16_t DIGITAL_INPUTS_TASK_STACK_DEPTH_WORDS = 512;    // Size of the Digital Input Task stack
 
 #endif // CUBE_MAIN_SYSTEM_DEFINES_H

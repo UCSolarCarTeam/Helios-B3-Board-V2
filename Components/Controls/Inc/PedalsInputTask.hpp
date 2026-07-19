@@ -22,6 +22,8 @@ public:
     }
 
     void InitTask();
+    uint8_t GetAccelPercentage() const { return accelPercentage; }
+    uint8_t GetRegenPercentage() const { return regenPercentage; }
 
 protected:
     static void RunTask(void* pvParams) { PedalsInputTask::Inst().Run(pvParams); } // Static Task Interface, passes control to the instance Run();
@@ -43,8 +45,8 @@ protected:
     uint16_t v_regenReading_N;
 
     // Pedal Percentage Values
-    float accelPercentage;
-    float regenPercentage;
+    uint8_t accelPercentage;
+    uint8_t regenPercentage;
 
 private:
     // Private Functions
