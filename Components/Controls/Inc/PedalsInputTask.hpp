@@ -43,8 +43,8 @@ protected:
     uint16_t v_regenReading_N;
 
     // Pedal Percentage Values
-    float accelPercentage;
-    float regenPercentage;
+    uint8_t accelPercentage;
+    uint8_t regenPercentage;
 
 private:
     // Private Functions

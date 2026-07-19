@@ -50,16 +50,17 @@ namespace UART {
 /* System Handles ------------------------------------------------------------------*/
 extern CRC_HandleTypeDef hcrc;          // CRC - Hardware CRC System Handle
 extern FDCAN_HandleTypeDef hfdcan2;     // FDCAN2 - FDCAN Peripheral Handle
-extern I2C_HandleTypeDef hi2c2;         // I2C2 - I2C2 Peripheral Handle
-extern I2C_HandleTypeDef hi2c3;
-extern ADC_HandleTypeDef hadc1;         // HADC1 - ADC1 Peripheral Handle
-extern ADC_HandleTypeDef hadc2;         // HADC2 - ADC2 Peripheral Handle
-extern TIM_HandleTypeDef htim3;
-
+extern I2C_HandleTypeDef hi2c1;			    // I2C1 - IOExpander I2C Peripheral Handle
+extern I2C_HandleTypeDef hi2c2;         // I2C2 - Telemetry I2C Peripheral Handle
+extern I2C_HandleTypeDef hi2c3;         // I2C3 - PWM Expander I2C Peripheral Handle
+extern ADC_HandleTypeDef hadc1;         // ADC1 - Regen ADC Peripheral Handle
+extern ADC_HandleTypeDef hadc2;         // ADC2 - Accel ADC Peripheral Handle
+extern TIM_HandleTypeDef htim3;         // TIM3 - ADC DMA Trigger Timer
 
 namespace SystemHandles {
     constexpr CRC_HandleTypeDef* CRC_Handle = &hcrc;
     constexpr FDCAN_HandleTypeDef* FDCAN_Handle = &hfdcan2;
+    constexpr I2C_HandleTypeDef* IOX_Handle = &hi2c1;
     constexpr I2C_HandleTypeDef* I2C2_Handle = &hi2c2;
     constexpr I2C_HandleTypeDef* PWMX_Handle = &hi2c3;
     constexpr ADC_HandleTypeDef* Regen_Handle = &hadc1;

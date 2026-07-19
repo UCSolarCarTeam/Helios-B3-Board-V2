@@ -76,11 +76,16 @@ constexpr uint16_t PEDALS_INPUT_TASK_STACK_DEPTH_WORDS = 512;    // Size of the 
 // PCA9685 / LIGHTS OUTPUT TASK
 constexpr uint8_t PCA9685_TASK_RTOS_PRIORITY = 2;
 constexpr uint8_t PCA9685_TASK_QUEUE_DEPTH_OBJS = 10;
-constexpr uint16_t PCA9685_TASK_STACK_DEPTH_WORDS = 768;
+constexpr uint16_t PCA9685_TASK_STACK_DEPTH_WORDS = 512;
 
 // PCA9685 / LIGHTS OUTPUT TASK
 constexpr uint8_t GNSSREAD_TASK_RTOS_PRIORITY = 2;
 constexpr uint8_t GNSSREAD_TASK_QUEUE_DEPTH_OBJS = 10;
-constexpr uint16_t GNSSREAD_TASK_STACK_DEPTH_WORDS = 768;
+constexpr uint16_t GNSSREAD_TASK_STACK_DEPTH_WORDS = 512;
+
+// DIGITALINPUT TASK
+constexpr uint8_t DIGITAL_INPUTS_TASK_RTOS_PRIORITY = 2;       // Priority of the Digital Input Task
+constexpr uint8_t DIGITAL_INPUTS_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the Digital Input Task queue
+constexpr uint16_t DIGITAL_INPUTS_TASK_STACK_DEPTH_WORDS = 512;    // Size of the Digital Input Task stack
 
 #endif // CUBE_MAIN_SYSTEM_DEFINES_H
