@@ -24,6 +24,11 @@ public:
 
     void InitTask();
 
+    // Getter for states
+    uint8_t GetFnrState() const { return fnrState; }
+    uint8_t GetDriverInputs() const { return driverInputs; }
+    uint8_t GetLightsInputs() const { return lightsInputs; }
+
 protected:
     static void RunTask(void* pvParams) { DigitalInputsTask::Inst().Run(pvParams); } // Static Task Interface, passes control to the instance Run();
     void Run(void * pvParams); // Main run code
@@ -34,6 +39,10 @@ private:
     DigitalInputsTask();        // Private constructor
     DigitalInputsTask(const DigitalInputsTask&);                        // Prevent copy-construction
     DigitalInputsTask& operator=(const DigitalInputsTask&);            // Prevent assignment
+
+    uint8_t driverInputs;
+    uint8_t lightsInputs;
+    uint8_t fnrState;
 };
 
 #endif    // HELIOS_Digital_INPUTS_TASK_HPP_

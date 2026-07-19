@@ -6,6 +6,8 @@
 */
 #include "SystemDefines.hpp"
 #include "LightsOutputTask.hpp"
+#include "DigitalInputsTask.hpp"
+#include "PedalsInputTask.hpp"
 #include "pca9685.h"
 
 /* Constants ---------------------------------------------------------------*/
@@ -44,7 +46,6 @@ constexpr uint8_t OUTPUT_CHANNELS[8] = {
 };
 
 constexpr uint8_t OUTPUT_COUNT = 8U;
-
 constexpr float OUTPUT_ON_DUTY  = 1.0f;
 constexpr float OUTPUT_OFF_DUTY = 0.0f;
 constexpr uint16_t OUTPUT_PHASE = 0U;
@@ -52,6 +53,19 @@ constexpr uint16_t OUTPUT_PHASE = 0U;
 // The PCA9685 default 7-bit address is 0x40.
 // STM32 HAL uses the left-shifted address, which is 0x80.
 constexpr uint8_t PCA9685_I2C_ADDR = 0x80U;
+
+
+static void SetLeftSignal(PCA9685_HandleTypeDef* hpca, bool blinkState) {
+    PCA9685_SetDuty(hpca, 0, blinkState ? 1.0f : 0.0f, 0);
+    PCA9685_SetDuty(hpca, 4, blinkState ? 1.0f : 0.0f, 0);
+    PCA9685_SetDuty(hpca, 15, blinkState ? 1.0f : 0.0f, 0);
+}
+
+static void SetRightSignal(PCA9685_HandleTypeDef* hpca, bool blinkState) {
+    PCA9685_SetDuty(hpca, 6, blinkState ? 1.0f : 0.0f, 0);
+    PCA9685_SetDuty(hpca, 8, blinkState ? 1.0f : 0.0f, 0);
+    PCA9685_SetDuty(hpca, 14, blinkState ? 1.0f : 0.0f, 0);
+}
 
 /**
  * @brief Constructor for PCA9685Task
@@ -192,27 +206,71 @@ void PCA9685Task::Run(void* pvParams)
     else {
         pcaReady = true;
         CUBE_PRINT("PCA9685Task - PCA9685 initialization complete\r\n");
-
-        // Start with every light and the horn turned off.
-        status = ApplyLightCommand(0x00U);
-
-        if (status != HAL_OK) {
-            pcaReady = false;
-            CUBE_PRINT(
-                "PCA9685Task - Output channels are not configured\r\n");
-        }
-        else {
-            CUBE_PRINT(
-                "PCA9685Task - All outputs initialized off\r\n");
-        }
     }
 
-    while (1) {
-        Command cm;
+    // Signal States
+    bool isBraking;
+    bool leftSignal;
+    bool rightSignal;
+    bool hazardSignal;
+    bool hornSignal;
 
-        // Wait until another task sends a command to this queue.
-        if (qEvtQueue->ReceiveWait(cm)) {
-            HandleCommand(cm);
+    // Blink States
+    uint8_t blinkCounter = 0;
+    bool blinkState = true;
+
+    while (1) {
+
+        // Increment counter and check for blink
+        if (blinkCounter == 10) {
+            blinkState = !blinkState;
+            blinkCounter = 0;
+        } else {
+            blinkCounter++;
         }
+
+        // Get Digital Inputs and check if regen pedal is pressed or mech brake switch is toggled
+        uint8_t digitalInputs = DigitalInputsTask::Inst().GetDriverInputs();
+        uint8_t lightsInputs = DigitalInputsTask::Inst().GetLightsInputs();
+        isBraking = ( 
+            (PedalsInputTask::Inst().GetRegenPercentage() > 5U) || 
+            (digitalInputs & (1 << 3)) 
+        );
+
+        rightSignal = lightsInputs & (1 << 0);
+        leftSignal = lightsInputs & (1 << 1);
+        hazardSignal = lightsInputs & (1 << 2);
+        hornSignal = digitalInputs & (1 << 5);
+        
+        // Toggle Horn
+        if (hornSignal) {
+            PCA9685_SetDuty(&hpca, 13, 1.0f, 0);
+        } else {
+            PCA9685_SetDuty(&hpca, 13, 0.0f, 0);
+        }
+
+        // Toggle Brake Lights
+        if (isBraking) {
+            PCA9685_SetDuty(&hpca, 5, 1.0f, 0);
+        } else {
+            PCA9685_SetDuty(&hpca, 5, 0.0f, 0);
+        }
+
+        // Signal and Hazard States
+        if (hazardSignal) {
+            SetLeftSignal(&hpca, blinkState);
+            SetRightSignal(&hpca, blinkState);
+        } else {
+            SetLeftSignal(&hpca, leftSignal && blinkState);
+            SetRightSignal(&hpca, rightSignal && blinkState);
+        } 
+
+        // Reset Blink States if no signals
+        if ( !(hazardSignal || leftSignal || rightSignal) ) {
+            blinkCounter = 0;
+            blinkState = true;
+        }
+
+        osDelay(100);
     }
 }

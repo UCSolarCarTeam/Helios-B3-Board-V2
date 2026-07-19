@@ -22,6 +22,8 @@ public:
     }
 
     void InitTask();
+    uint8_t GetAccelPercentage() const { return accelPercentage; }
+    uint8_t GetRegenPercentage() const { return regenPercentage; }
 
 protected:
     static void RunTask(void* pvParams) { PedalsInputTask::Inst().Run(pvParams); } // Static Task Interface, passes control to the instance Run();

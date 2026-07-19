@@ -50,6 +50,11 @@ void DigitalInputsTask::Run(void * pvParams)
 	// Initialize IO Expander
     IOE_Init(&hiox);
 
+    // Initialize states
+    driverInputs = 0;
+    lightsInputs = 0;
+    fnrState = 0b11;
+
 	while (1) {
 
 		// Test GPIO Inputs
@@ -76,11 +81,6 @@ void DigitalInputsTask::Run(void * pvParams)
         CUBE_PRINT("GPB7: %d\r\n", (gpb >> 7) & 1);
 #endif 0
         
-        // DriverInputs
-        uint8_t driverInputs = 0;
-        uint8_t lightsInputs = 0;
-        uint8_t fnrState = 0;
-
         // Get Last read
         // lasteread = GPA << 8 | GPB
         uint16_t lastread = getLastRead(&hiox);
@@ -90,6 +90,8 @@ void DigitalInputsTask::Run(void * pvParams)
         if ((lastread >> 8) & 1) {
             driverInputs |= (1 << 4);
             CUBE_PRINT("Motor Reset\r\n");
+        } else {
+            driverInputs &= ~(1 << 4);
         }
 
         // GPA1
@@ -97,13 +99,17 @@ void DigitalInputsTask::Run(void * pvParams)
         if ((lastread >> 9) & 1) {
             driverInputs |= (1 << 1);
             CUBE_PRINT("Left Signal\r\n");
+        } else {
+            driverInputs &= ~(1 << 1);
         }
         
         // GPA2
-        // Horn Enable
+        // Horn Signal
         if ((lastread >> 10) & 1) {
             driverInputs |= (1 << 5);
-            CUBE_PRINT("Horn Enable\r\n");
+            CUBE_PRINT("Horn Signal\r\n");
+        } else {
+            driverInputs &= ~(1 << 5);
         }
 
         // GPA3
@@ -111,6 +117,8 @@ void DigitalInputsTask::Run(void * pvParams)
         if ((lastread >> 11) & 1) {
             driverInputs |= (1 << 0);
             CUBE_PRINT("Right Signal\r\n");
+        } else {
+            driverInputs &= ~(1 << 0);
         }
 
         // GPA4
@@ -118,6 +126,8 @@ void DigitalInputsTask::Run(void * pvParams)
         if ((lastread >> 12) & 1) {
             driverInputs |= (1 << 6);
             CUBE_PRINT("Dashboard Rotate\r\n");
+        } else {
+            driverInputs &= ~(1 << 6);
         }
 
         // GPA5
@@ -125,6 +135,8 @@ void DigitalInputsTask::Run(void * pvParams)
         if ((lastread >> 13) & 1) {
             driverInputs |= (1 << 7);
             CUBE_PRINT("Lap Button\r\n");
+        } else {
+            driverInputs &= ~(1 << 7);
         }
 
         // GPA6
@@ -133,6 +145,8 @@ void DigitalInputsTask::Run(void * pvParams)
             // driverInputs |= (1 << );
             fnrState |= 1;
             CUBE_PRINT("FWD 0\r\n");
+        } else {
+            fnrState &= ~(1 << 0);
         }
 
         // GPA7
@@ -141,6 +155,8 @@ void DigitalInputsTask::Run(void * pvParams)
             // driverInputs |= (1 << );
             fnrState |= (1 << 1);
             CUBE_PRINT("FWD 1\r\n");
+        }   else {
+            fnrState &= ~(1 << 1);
         }
 
         // GPB2
@@ -148,6 +164,8 @@ void DigitalInputsTask::Run(void * pvParams)
         if ((lastread >> 2) & 1) {
             driverInputs |= (1 << 3);
             CUBE_PRINT("Mechanical Brake\r\n");
+        } else {
+            driverInputs &= ~(1 << 3);
         }
 
         // GPB3
@@ -155,6 +173,8 @@ void DigitalInputsTask::Run(void * pvParams)
         if ((lastread >> 3) & 1) {
             lightsInputs |= (1 << 2);
             CUBE_PRINT("Emergency Hazard\r\n");
+        } else {
+            lightsInputs &= ~(1 << 2);
         }
 
         // FNR (MAY CHANGE)
@@ -162,6 +182,9 @@ void DigitalInputsTask::Run(void * pvParams)
         // 01 neutral
         // 10 forward
         // 11 not implemented
+
+        // Clear Forward, Neutral, Reverse bits first
+        driverInputs &= ~0b111;
         switch (fnrState)
         {
         // REVERSE
@@ -187,7 +210,10 @@ void DigitalInputsTask::Run(void * pvParams)
             break;
         }
         
+        // Send CAN Messages
+
 		osDelay(50);
 
 	}
 }
+

@@ -86,6 +86,6 @@ void PedalsInputTask::Run(void * pvParams)
         regenPercentage = MapAdcToPercent(v_regenReading_P, PEDAL_MIN, PEDAL_MAX);
         // CUBE_PRINT("ACCEL: %u%%  REGEN: %u%%\r\n", accelPercentage, regenPercentage);
 
-        osDelay(200);
+        osDelay(50);
     }
 }

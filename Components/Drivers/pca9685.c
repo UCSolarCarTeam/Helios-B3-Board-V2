@@ -8,6 +8,7 @@
 #include <math.h>
 #include <pca9685.h>
 
+
 // ========== Internal helpers ==========
 static HAL_StatusTypeDef wr8(PCA9685_HandleTypeDef *hpca, uint8_t reg, uint8_t val) {
     return HAL_I2C_Mem_Write(hpca->i2c, hpca->addr7, reg, I2C_MEMADD_SIZE_8BIT, &val, 1, 100);
@@ -85,7 +86,8 @@ HAL_StatusTypeDef PCA9685_Sleep(PCA9685_HandleTypeDef *hpca, bool sleep) {
     if (!sleep) {
         // datasheet: allow oscillator to stabilize (max 500 µs) before touching PWM regs
         // (You can tighten if you know actual osc; keep safe.)
-        HAL_Delay(1);
+        // HAL_Delay(1);
+        osDelay(1);
     }
     return HAL_OK;
 }
@@ -108,7 +110,8 @@ HAL_StatusTypeDef PCA9685_SetPWMFreq(PCA9685_HandleTypeDef *hpca, float hz) {
     if (wr8(hpca, PCA9685_PRE_SCALE, prescale) != HAL_OK) return HAL_ERROR;
 
     if (wr8(hpca, PCA9685_MODE1, oldmode) != HAL_OK) return HAL_ERROR;
-    HAL_Delay(1); // wait for osc
+    // HAL_Delay(1); // wait for osc
+    osDelay(1);
 
     // Optional: set RESTART to quickly apply previous PWM states
     return PCA9685_Restart(hpca);
@@ -181,7 +184,8 @@ HAL_StatusTypeDef PCA9685_Restart(PCA9685_HandleTypeDef *hpca) {
     if (mode1 & BIT(MODE1_SLEEP_Pos)) {
         mode1 &= ~BIT(MODE1_SLEEP_Pos);
         if (wr8(hpca, PCA9685_MODE1, mode1) != HAL_OK) return HAL_ERROR;
-        HAL_Delay(1);
+        // HAL_Delay(1);
+        osDelay(1);
     }
 
     // Set RESTART=1 to kick PWM logic
