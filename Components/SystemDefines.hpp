@@ -1,5 +1,5 @@
 /**
-  ******************************************************************************
+******************************************************************************
   * @file           : SystemDefines.hpp
   * @brief          : Macros and wrappers
   ******************************************************************************
@@ -72,6 +72,16 @@ constexpr uint16_t IMU_READ_TASK_STACK_DEPTH_WORDS = 512;    // Size of the IMU 
 constexpr uint8_t PEDALS_INPUT_TASK_RTOS_PRIORITY = 2;       // Priority of the Pedals Input Task
 constexpr uint8_t PEDALS_INPUT_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the Pedals Input Task queue
 constexpr uint16_t PEDALS_INPUT_TASK_STACK_DEPTH_WORDS = 512;    // Size of the Pedals Input Task stack
+
+// PCA9685 / LIGHTS OUTPUT TASK
+constexpr uint8_t PCA9685_TASK_RTOS_PRIORITY = 2;
+constexpr uint8_t PCA9685_TASK_QUEUE_DEPTH_OBJS = 10;
+constexpr uint16_t PCA9685_TASK_STACK_DEPTH_WORDS = 512;
+
+// PCA9685 / LIGHTS OUTPUT TASK
+constexpr uint8_t GNSSREAD_TASK_RTOS_PRIORITY = 2;
+constexpr uint8_t GNSSREAD_TASK_QUEUE_DEPTH_OBJS = 10;
+constexpr uint16_t GNSSREAD_TASK_STACK_DEPTH_WORDS = 512;
 
 // DIGITALINPUT TASK
 constexpr uint8_t DIGITAL_INPUTS_TASK_RTOS_PRIORITY = 2;       // Priority of the Digital Input Task
