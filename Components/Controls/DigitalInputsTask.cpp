@@ -79,70 +79,114 @@ void DigitalInputsTask::Run(void * pvParams)
         // DriverInputs
         uint8_t driverInputs = 0;
         uint8_t lightsInputs = 0;
+        uint8_t fnrState = 0;
 
         // Get Last read
+        // lasteread = GPA << 8 | GPB
         uint16_t lastread = getLastRead(&hiox);
 
-        // Dashboard Rotate
-        if ((lastread >> 8) & 1) {
-            driverInputs |= (1 << 6);
-            CUBE_PRINT("Dashboard Rotate\r\n");
-        }
-
-        // Lap Button
-        if ((lastread >> 9) & 1) {
-            driverInputs |= (1 << 7);
-            CUBE_PRINT("Lap Button\r\n");
-        }
-
-        // Forward/Neutral/Reverse Combo 0
-        if ((lastread >> 10) & 1) {
-            // driverInputs |= (1 << );
-            CUBE_PRINT("FWD 0\r\n");
-        }
-
-        // Forward/Neutral/Reverse Combo 1
-        if ((lastread >> 11) & 1) {
-            // driverInputs |= (1 << );
-            CUBE_PRINT("FWD 1\r\n");
-        }
-
+        // GPA0
         // Motor Reset
-        if ((lastread >> 12) & 1) {
+        if ((lastread >> 8) & 1) {
             driverInputs |= (1 << 4);
             CUBE_PRINT("Motor Reset\r\n");
         }
 
+        // GPA1
+        // Left Signal
+        if ((lastread >> 9) & 1) {
+            driverInputs |= (1 << 1);
+            CUBE_PRINT("Left Signal\r\n");
+        }
+        
+        // GPA2
         // Horn Enable
-        if ((lastread >> 14) & 1) {
+        if ((lastread >> 10) & 1) {
             driverInputs |= (1 << 5);
             CUBE_PRINT("Horn Enable\r\n");
         }
 
+        // GPA3
         // Right Signal
-        if ((lastread >> 0) & 1) {
+        if ((lastread >> 11) & 1) {
             driverInputs |= (1 << 0);
             CUBE_PRINT("Right Signal\r\n");
         }
 
+        // GPA4
+        // Dashboard Rotate
+        if ((lastread >> 12) & 1) {
+            driverInputs |= (1 << 6);
+            CUBE_PRINT("Dashboard Rotate\r\n");
+        }
+
+        // GPA5
+        // Lap Button
+        if ((lastread >> 13) & 1) {
+            driverInputs |= (1 << 7);
+            CUBE_PRINT("Lap Button\r\n");
+        }
+
+        // GPA6
+        // Forward/Neutral/Reverse Combo 0
+        if ((lastread >> 14) & 1) {
+            // driverInputs |= (1 << );
+            fnrState |= 1;
+            CUBE_PRINT("FWD 0\r\n");
+        }
+
+        // GPA7
+        // Forward/Neutral/Reverse Combo 1
+        if ((lastread >> 15) & 1) {
+            // driverInputs |= (1 << );
+            fnrState |= (1 << 1);
+            CUBE_PRINT("FWD 1\r\n");
+        }
+
+        // GPB2
         // Mechanical Brake
-        if ((lastread >> 1) & 1) {
+        if ((lastread >> 2) & 1) {
             driverInputs |= (1 << 3);
             CUBE_PRINT("Mechanical Brake\r\n");
         }
 
+        // GPB3
         // Emergency Hazard
-        if ((lastread >> 2) & 1) {
+        if ((lastread >> 3) & 1) {
             lightsInputs |= (1 << 2);
             CUBE_PRINT("Emergency Hazard\r\n");
         }
 
-        // Left Signal
-        if ((lastread >> 3) & 1) {
+        // FNR (MAY CHANGE)
+        // 00 reverse
+        // 01 neutral
+        // 10 forward
+        // 11 not implemented
+        switch (fnrState)
+        {
+        // REVERSE
+        case 0b00:
+            driverInputs |= (1 << 2);
+            break;
+        
+        // NEUTRAL
+        case 0b01:
             driverInputs |= (1 << 1);
-            CUBE_PRINT("Left Signal\r\n");
-        }
+            break;
 
+        // FORWARD
+        case 0b10:
+            driverInputs |= (1 << 0);
+            break;
+        
+        // ERROR
+        case 0b11:
+            break;
+
+        default:
+            break;
+        }
+        
 		osDelay(50);
 
 	}
