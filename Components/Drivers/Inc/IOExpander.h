@@ -69,20 +69,26 @@ typedef enum {
 typedef struct {
 	// I2C Peripheral Handler and Address
 	I2C_HandleTypeDef*	hi2c;
-	uint16_t			addr;
+	uint8_t			addr;
+	// Internal State
+	uint8_t last_write[2];
+	uint8_t pending_write[2];
+	uint8_t last_read[2];
+
 } MCP23017_HandleTypeDef;
 
 // ----------------- Public Functions -----------------
 void IOE_Init(MCP23017_HandleTypeDef* hiox);
-bool IOE_SetPin(IOExpanderPin pin, IOState state);        // stage only
+bool IOE_SetPin(MCP23017_HandleTypeDef* hiox, IOExpanderPin pin, IOState state);        // stage only
 bool IOE_SetPinNow(MCP23017_HandleTypeDef* hiox, IOExpanderPin pin, IOState state);     // stage + commit
-bool IOE_TogglePin(IOExpanderPin pin);                    // stage only
+bool IOE_TogglePin(MCP23017_HandleTypeDef* hiox, IOExpanderPin pin);                    // stage only
 bool IOE_TogglePinNow(MCP23017_HandleTypeDef* hiox, IOExpanderPin pin);                 // stage + commit
 bool IOE_Commit(MCP23017_HandleTypeDef* hiox);                                    // commit staged changes
 bool IOE_Update(MCP23017_HandleTypeDef* hiox);                                    // read from device
-IOState IOE_GetPinState(IOExpanderPin pin);               // last read state
+IOState IOE_GetPinState(MCP23017_HandleTypeDef* hiox, IOExpanderPin pin);               // last read state
 IOState IOE_GetPinStateNow(MCP23017_HandleTypeDef* hiox, IOExpanderPin pin);            // read immediately
 
+uint16_t getLastRead(MCP23017_HandleTypeDef* hiox);
 #ifdef __cplusplus
 }
 #endif

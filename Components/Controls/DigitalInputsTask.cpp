@@ -39,15 +39,111 @@ void DigitalInputsTask::InitTask()
 void DigitalInputsTask::Run(void * pvParams)
 {
 	// Create IOExpander Handler
+    MCP23017_HandleTypeDef hiox = {
+        .hi2c = SystemHandles::IOX_Handle,
+        .addr = 0x42,    // A0 = 1 | A1 = A2 = 0
+		.last_write = {0x00, 0x00},
+		.pending_write = {0x00, 0x00},
+		.last_read = {0x00, 0x00}
+    };
 
 	// Initialize IO Expander
-
+    IOE_Init(&hiox);
 
 	while (1) {
 
+		// Test GPIO Inputs
+#if 0
+        uint16_t lastread = getLastRead(&hiox);
+        uint8_t gpa = (lastread >> 8) & 0xFF;
+        uint8_t gpb = lastread & 0xFF;
+        CUBE_PRINT("GPA0: %d\r\n", (gpa >> 0) & 1);
+        CUBE_PRINT("GPA1: %d\r\n", (gpa >> 1) & 1);
+        CUBE_PRINT("GPA2: %d\r\n", (gpa >> 2) & 1);
+        CUBE_PRINT("GPA3: %d\r\n", (gpa >> 3) & 1);
+        CUBE_PRINT("GPA4: %d\r\n", (gpa >> 4) & 1);
+        CUBE_PRINT("GPA5: %d\r\n", (gpa >> 5) & 1);
+        CUBE_PRINT("GPA6: %d\r\n", (gpa >> 6) & 1);
+        CUBE_PRINT("GPA7: %d\r\n", (gpa >> 7) & 1);
 
+        CUBE_PRINT("GPB0: %d\r\n", (gpb >> 0) & 1);
+        CUBE_PRINT("GPB1: %d\r\n", (gpb >> 1) & 1);
+        CUBE_PRINT("GPB2: %d\r\n", (gpb >> 2) & 1);
+        CUBE_PRINT("GPB3: %d\r\n", (gpb >> 3) & 1);
+        CUBE_PRINT("GPB4: %d\r\n", (gpb >> 4) & 1);
+        CUBE_PRINT("GPB5: %d\r\n", (gpb >> 5) & 1);
+        CUBE_PRINT("GPB6: %d\r\n", (gpb >> 6) & 1);
+        CUBE_PRINT("GPB7: %d\r\n", (gpb >> 7) & 1);
+#endif 0
+        
+        // DriverInputs
+        uint8_t driverInputs = 0;
+        uint8_t lightsInputs = 0;
 
-		osDelay(1000);
+        // Get Last read
+        uint16_t lastread = getLastRead(&hiox);
+
+        // Dashboard Rotate
+        if ((lastread >> 8) & 1) {
+            driverInputs |= (1 << 6);
+            CUBE_PRINT("Dashboard Rotate\r\n");
+        }
+
+        // Lap Button
+        if ((lastread >> 9) & 1) {
+            driverInputs |= (1 << 7);
+            CUBE_PRINT("Lap Button\r\n");
+        }
+
+        // Forward/Neutral/Reverse Combo 0
+        if ((lastread >> 10) & 1) {
+            // driverInputs |= (1 << );
+            CUBE_PRINT("FWD 0\r\n");
+        }
+
+        // Forward/Neutral/Reverse Combo 1
+        if ((lastread >> 11) & 1) {
+            // driverInputs |= (1 << );
+            CUBE_PRINT("FWD 1\r\n");
+        }
+
+        // Motor Reset
+        if ((lastread >> 12) & 1) {
+            driverInputs |= (1 << 4);
+            CUBE_PRINT("Motor Reset\r\n");
+        }
+
+        // Horn Enable
+        if ((lastread >> 14) & 1) {
+            driverInputs |= (1 << 5);
+            CUBE_PRINT("Horn Enable\r\n");
+        }
+
+        // Right Signal
+        if ((lastread >> 0) & 1) {
+            driverInputs |= (1 << 0);
+            CUBE_PRINT("Right Signal\r\n");
+        }
+
+        // Mechanical Brake
+        if ((lastread >> 1) & 1) {
+            driverInputs |= (1 << 3);
+            CUBE_PRINT("Mechanical Brake\r\n");
+        }
+
+        // Emergency Hazard
+        if ((lastread >> 2) & 1) {
+            lightsInputs |= (1 << 2);
+            CUBE_PRINT("Emergency Hazard\r\n");
+        }
+
+        // Left Signal
+        if ((lastread >> 3) & 1) {
+            driverInputs |= (1 << 1);
+            CUBE_PRINT("Left Signal\r\n");
+        }
+
+		osDelay(50);
 
 	}
 }

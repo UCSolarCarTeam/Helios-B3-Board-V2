@@ -5,6 +5,27 @@
  ******************************************************************************
 */
 #include "PedalsInputTask.hpp"
+#include <algorithm>
+
+#define PEDAL_MIN 1600U
+#define PEDAL_MAX 3800U
+
+// Map ADC values and scale to percentage
+static uint8_t MapAdcToPercent(uint16_t adc, uint16_t min, uint16_t max)
+{
+    // Handle increasing sensor
+    if (min < max)
+    {
+        adc = std::clamp(adc, min, max);
+        return static_cast<uint8_t>(
+            ((uint32_t)(adc - min) * 100U) / (max - min));
+    }
+
+    // Handle decreasing sensor
+    adc = std::clamp(adc, max, min);
+    return static_cast<uint8_t>(
+        ((uint32_t)(min - adc) * 100U) / (min - max));
+}
 
 /**
  * @brief Constructor for PedalsInputTask
@@ -38,14 +59,13 @@ void PedalsInputTask::InitTask()
  */
 void PedalsInputTask::Run(void * pvParams)
 {
-
     // HAL Status Handlers for Debugging
     HAL_StatusTypeDef statusA;
     HAL_StatusTypeDef statusR;
 
     // Calibrate ADCs
-    // statusR = HAL_ADCEx_Calibration_Start(SystemHandles::Regen_Handle, ADC_SINGLE_ENDED);
-    // statusA= HAL_ADCEx_Calibration_Start(SystemHandles::Accel_Handle, ADC_SINGLE_ENDED);
+    statusR = HAL_ADCEx_Calibration_Start(SystemHandles::Regen_Handle, ADC_SINGLE_ENDED);
+    statusA = HAL_ADCEx_Calibration_Start(SystemHandles::Accel_Handle, ADC_SINGLE_ENDED);
 
     //Start ADCs
     statusR = HAL_ADC_Start_DMA(SystemHandles::Regen_Handle, (uint32_t*)regenDmaBuffer, 2);
@@ -60,8 +80,11 @@ void PedalsInputTask::Run(void * pvParams)
         v_regenReading_N = regenDmaBuffer[1];
         v_accelReading_P = accelDmaBuffer[0];
         v_accelReading_N = accelDmaBuffer[1];
+        // CUBE_PRINT("%u %u | %u %u\r\n", v_accelReading_P, v_accelReading_N, v_regenReading_P, v_regenReading_N);
 
-        CUBE_PRINT("%u %u | %u %u\r\n", v_accelReading_P, v_accelReading_N, v_regenReading_P, v_regenReading_N);
+        accelPercentage = MapAdcToPercent(v_accelReading_P, PEDAL_MIN, PEDAL_MAX);
+        regenPercentage = MapAdcToPercent(v_regenReading_P, PEDAL_MIN, PEDAL_MAX);
+        // CUBE_PRINT("ACCEL: %u%%  REGEN: %u%%\r\n", accelPercentage, regenPercentage);
 
         osDelay(200);
     }

@@ -19,6 +19,7 @@
 #include "CanTxTask.hpp"
 #include "ImuReadTask.hpp"
 #include "PedalsInputTask.hpp"
+#include "DigitalInputsTask.hpp"
 
 /* Drivers ------------------------------------------------------------------*/
 namespace Driver {
@@ -37,7 +38,8 @@ void run_main() {
 //    CANRxTask::Inst().InitTask();
 //    CANTxTask::Inst().InitTask();
 //    ImuReadTask::Inst().InitTask();
-    PedalsInputTask::Inst().InitTask();
+//    PedalsInputTask::Inst().InitTask();
+//    DigitalInputsTask::Inst().InitTask();
 
     // Print System Boot Info : Warning, don't queue more than 10 prints before scheduler starts
     CUBE_PRINT("\n-- CUBE SYSTEM --\n");
