@@ -7,6 +7,7 @@
 
 #include <math.h>
 #include <pca9685.h>
+#include "cmsis_os2.h"
 
 
 // ========== Internal helpers ==========
