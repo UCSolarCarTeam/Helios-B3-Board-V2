@@ -12,11 +12,16 @@
 #include "Mutex.hpp"
 // Board specific includes
 
+#include "stm32h563xx.h"
 #include "stm32h5xx_hal.h"
 #include "stm32h5xx_ll_usart.h"
 #include "stm32h5xx_hal_rcc.h"
 #include "stm32h5xx_ll_dma.h"
-#include "stm32h563xx.h"
+#include "stm32h5xx_hal_fdcan.h"
+#include "stm32h5xx_hal_i2c.h"
+#include "stm32h5xx_hal_adc.h"
+#include "stm32h5xx_hal_adc_ex.h"
+#include "stm32h5xx_hal_tim.h"
 
 
 /* Interface Functions ------------------------------------------------------------------*/
@@ -43,12 +48,25 @@ namespace UART {
 }
 
 /* System Handles ------------------------------------------------------------------*/
-extern CRC_HandleTypeDef hcrc;       // CRC - Hardware CRC System Handle
+extern CRC_HandleTypeDef hcrc;          // CRC - Hardware CRC System Handle
+extern FDCAN_HandleTypeDef hfdcan2;     // FDCAN2 - FDCAN Peripheral Handle
+extern I2C_HandleTypeDef hi2c1;			    // I2C1 - IOExpander I2C Peripheral Handle
+extern I2C_HandleTypeDef hi2c2;         // I2C2 - Telemetry I2C Peripheral Handle
+extern I2C_HandleTypeDef hi2c3;         // I2C3 - PWM Expander I2C Peripheral Handle
+extern ADC_HandleTypeDef hadc1;         // ADC1 - Regen ADC Peripheral Handle
+extern ADC_HandleTypeDef hadc2;         // ADC2 - Accel ADC Peripheral Handle
+extern TIM_HandleTypeDef htim3;         // TIM3 - ADC DMA Trigger Timer
 
 namespace SystemHandles {
     constexpr CRC_HandleTypeDef* CRC_Handle = &hcrc;
+    constexpr FDCAN_HandleTypeDef* FDCAN_Handle = &hfdcan2;
+    constexpr I2C_HandleTypeDef* IOX_Handle = &hi2c1;
+    constexpr I2C_HandleTypeDef* I2C2_Handle = &hi2c2;
+    constexpr I2C_HandleTypeDef* PWMX_Handle = &hi2c3;
+    constexpr ADC_HandleTypeDef* Regen_Handle = &hadc1;
+    constexpr ADC_HandleTypeDef* Accel_Handle = &hadc2;
+    constexpr TIM_HandleTypeDef* ADC_Timer_Handle = &htim3;
 }
-
 
 
 #endif /* MAIN_SYSTEM_HPP_ */

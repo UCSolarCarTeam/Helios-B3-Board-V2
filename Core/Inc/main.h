@@ -29,18 +29,6 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32h5xx_hal.h"
 
-#include "stm32h5xx_ll_usart.h"
-#include "stm32h5xx_ll_rcc.h"
-#include "stm32h5xx_ll_bus.h"
-#include "stm32h5xx_ll_cortex.h"
-#include "stm32h5xx_ll_system.h"
-#include "stm32h5xx_ll_utils.h"
-#include "stm32h5xx_ll_pwr.h"
-#include "stm32h5xx_ll_gpio.h"
-#include "stm32h5xx_ll_dma.h"
-
-#include "stm32h5xx_ll_exti.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -81,8 +69,6 @@ void Error_Handler(void);
 #define GNSS_nRESET_GPIO_Port GPIOA
 #define GNSS_TIMEPULSE_Pin GPIO_PIN_3
 #define GNSS_TIMEPULSE_GPIO_Port GPIOA
-#define GNSS_INT_Pin GPIO_PIN_4
-#define GNSS_INT_GPIO_Port GPIOA
 #define H_ADC_1_Pin GPIO_PIN_6
 #define H_ADC_1_GPIO_Port GPIOA
 #define H_ADC_2_Pin GPIO_PIN_7
@@ -123,6 +109,8 @@ void Error_Handler(void);
 #define H_I2C3_SCL_GPIO_Port GPIOA
 #define IOX_nRESET_Pin GPIO_PIN_3
 #define IOX_nRESET_GPIO_Port GPIOD
+#define IOX_INTB_Pin GPIO_PIN_4
+#define IOX_INTB_GPIO_Port GPIOD
 #define IOX_INTA_Pin GPIO_PIN_5
 #define IOX_INTA_GPIO_Port GPIOD
 #define BOOT1_Pin GPIO_PIN_7
