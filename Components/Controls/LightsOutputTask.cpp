@@ -220,7 +220,7 @@ void PCA9685Task::Run(void* pvParams)
     bool blinkState = true;
 
     while (1) {
-
+#if 0
         // Increment counter and check for blink
         if (blinkCounter == 10) {
             blinkState = !blinkState;
@@ -270,7 +270,13 @@ void PCA9685Task::Run(void* pvParams)
             blinkCounter = 0;
             blinkState = true;
         }
+#endif
 
-        osDelay(100);
+        SetLeftSignal(&hpca, blinkState);
+        SetRightSignal(&hpca, blinkState);
+        blinkState = !blinkState;
+        CUBE_PRINT("Blinking Left and Right Signal\r\n");
+
+        osDelay(1000);
     }
 }
