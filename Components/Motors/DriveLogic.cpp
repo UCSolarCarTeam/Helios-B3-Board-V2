@@ -9,7 +9,7 @@ namespace DriveLogic {
             if (in.mechBrake) {
                 return Gear::MechBraking;
             }
-            if (in.accelPercent > cfg.fwdPedalDeadzone) {
+            if (in.accelPercent > cfg.accPedalDeadzone) {
                 return Gear::Accelerating;
             }
 
@@ -38,10 +38,10 @@ namespace DriveLogic {
         // Returns a percent of the max motor current
         float pedal2Current(float pedalPercent, Gear gear, float scalingFactor, const Config& cfg){
             if (gear == Gear::Accelerating) {
-                float deadzone = cfg.fwdPedalDeadzone;
+                float deadzone = cfg.accPedalDeadzone;
 
             } else if (gear == Gear::RegenBraking) {
-                float deadzone = cfg.fwdPedalDeadzone;
+                float deadzone = cfg.accPedalDeadzone;
             }
 
             if (pedalPercent <= deadzone) {
@@ -49,12 +49,11 @@ namespace DriveLogic {
             }
 
             const float diff = cfg.pedalMax - deadzone;
-            if (diff <= 0.0f) { // if unsafe config
+            if (diff <= 0.0f) { // unsafe config
                 return 0.0f;
             }
 
             return clamp((pedalPercent - deadzone) / diff * scalingFactor)
-
         }
     } //
 

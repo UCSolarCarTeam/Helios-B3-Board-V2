@@ -1,18 +1,92 @@
 #include <string.h> // for memcpy
 #include "cmsis_os2.h"
+
 #include "MotorControlTask.hpp"
+#include "DriveLogic.hpp"
 
-#define DISABLED 0
-#define DEBUG_PRINTS 0
-#define HARDCODE 0
+namespace {
+    // 10 Hz
+    constexpr uint32_t DRIVE_COMMAND_PERIOD_TICKS = 100;
 
-uint32_t motorVehicleVelocityInput;
+    // True if DigitalInputsTask doesn't flip the active low bits lol
+    constexpr bool DRIVER_INPUTS_ACTIVE_LOW = false;
 
-MotorControlTask::MotorControlTask() : Task(MOTOR_CONTROL_TASK_QUEUE_DEPTH_OBJS){}
+    constexpr uint8_t BIT_FORWARD    = 0;
+    constexpr uint8_t BIT_REVERSE    = 2;
+    constexpr uint8_t BIT_MECH_BRAKE = 3;
+    constexpr uint8_t BIT_RESET      = 4;
 
-void MotorControlTask::InitTask()
-{
-    // Make sure the task is not already initialized
+    DriveLogic::Config makeConfig(){
+        // Please adjust the config in the Header file :)
+        DriveLogic::Config cfg;
+
+        cfg.accPedalDeadzone = static_cast<float>(NON_ZERO_THRESHOLD);
+        cfg.regPedalDeadzone = static_cast<float>(NON_ZERO_THRESHOLD);
+
+        cfg.pedalMax = static_cast<float>(MAX_PEDAL_THRESHOLD);
+        
+        cfg.forwardRpm = static_cast<float>(MAX_FORWARD_RPM);
+        cfg.reverseRpm = static_cast<float>(MAX_REVERSE_RPM);
+        cfg.regenRpm = static_cast<float>(REGEN_RPM); 
+
+        cfg.accelScaling = static_cast<float>(MOTOR_PERCENTAGE_REDUCER);
+        cfg.regenScaling = static_cast<float>(MOTOR_PERCENTAGE_REDUCER * REGEN_INPUT_SCALING);
+
+        return cfg;
+    }
+
+    DriveLogic::Direction decodeDirection(uint8_t inputs){
+        const bool fwd = isPressed(inputs, BIT_FORWARD);
+        const bool rev = isPressed(inputs, BIT_REVERSE);
+
+        if (fwd && rev) { 
+            return DriveLogic::Direction::Invalid; 
+        }
+
+        if (fwd) { 
+            return DriveLogic::Direction::Forward; 
+        }
+
+        if (rev) { 
+            return DriveLogic::Direction::Reverse; 
+        }
+
+        return DriveLogic::Direction::Neutral;
+    }
+
+    bool isPressed(uint8_t inputs, uint8_t bit){
+        const bool raw = (inputs >> bit) & 1U;
+        return DRIVER_INPUTS_ACTIVE_LOW ? !raw : raw;
+    }
+
+    float clamp(float a){
+        if (!(a > 0.0f)) { 
+            return 0.0f; 
+        }
+
+        if (a > 1.0f){ 
+            return 1.0f; 
+        }
+        
+        return a;
+    }
+
+    template <typename CommandID>
+    void sendMotor(CANMsg& msg, CommandID commandID, float lowWord, float highWord)
+    {
+        float data[2] = {lowWord, highWord};
+        memcpy(&msg.data[0], &data[0], sizeof(data));
+
+        Command cmd = Command(TASK_SPECIFIC_COMMAND, commandID);
+        cmd.CopyDataToCommand(reinterpret_cast<uint8_t*>(data), sizeof(data));
+        CANTxTask::Inst().SendCommandReference(cmd);
+    }
+
+} // End namespace
+
+MotorControlTask::MotorControlTask() : Task(MOTOR_CONTROL_TASK_QUEUE_DEPTH_OBJS) {}
+
+void MotorControlTask::InitTask() {
     CUBE_ASSERT(rtTaskHandle == nullptr, "Cannot initialize Motor Control task twice");
 
     BaseType_t rtValue =
@@ -26,350 +100,72 @@ void MotorControlTask::InitTask()
     CUBE_ASSERT(rtValue == pdPASS, "MotorControlTask::InitTask() - xTaskCreate() failed");
 }
 
-void MotorControlTask::Run(void *pvParams)
-{
-    uint32_t prevWakeTime = osKernelGetTickCount();
+void MotorControlTask::Run(void *pvParams){
+    motor_drive_msg.ID = 0;
+    motor_drive_msg.extendedID = MOTOR_DRIVE_STDID;
+    motor_drive_msg.DLC = MOTOR_DRIVE_DLC;
 
-    DriveCommandsInfo driveCommandsInfo = {
-        .motorCurrentOut = 0.0f,
-        .motorState = Off,
-        .prevResetInput = 1,
-        .resetStatus = NotResetting,
-        .regenQueueIndex = 0,
-        .accelQueueIndex = 0,
-    };
+    motor_power_msg.ID = 0;
+    motor_power_msg.extendedID = MOTOR_POWER_STDID;
+    motor_power_msg.DLC = MOTOR_POWER_DLC;
 
-    uint32_t switching = 0;
+    const DriveLogic::Config cfg = makeConfig();
+    DriveLogic::State state;
 
-    this->motor_drive_msg.ID = 0;
-    this->motor_drive_msg.extendedID = MOTOR_DRIVE_STDID;
-    this->motor_drive_msg.DLC = MOTOR_DRIVE_DLC;
+    bool prevResetPressed = false;
+    uint32_t wakeTime = osKernelGetTickCount();
 
-    this->motor_power_msg.ID = 0;
-	this->motor_power_msg.extendedID = MOTOR_POWER_STDID;
-    this->motor_power_msg.DLC = MOTOR_POWER_DLC;
+    for (;;){
+        wakeTime += DRIVE_COMMAND_PERIOD_TICKS;
+        osDelayUntil(wakeTime);
 
-    for (;;)
-    {
-        sendDriveCommands(&prevWakeTime, &driveCommandsInfo, &switching);
-    }
-}
+        // Get Driver Inputs
+        const uint8_t driverInputs = DigitalInputsTask::Inst().GetDriverInputs();
 
-// -----------------------------------------
+        // Velocity Gates for Switching between Fwd and Rev
+        const float v0 = motor0VehicleVelocityInput;
+        const float v1 = motor1VehicleVelocityInput;
 
-CANMsg MotorControlTask::getMotorDrive(){
-	return this->motor_drive_msg;
-}
+        const bool forwardSafe = v0 >= SAFE_VEHICLE_VELOCITY_TO_GO_FORWARD &&
+                                 v1 >= SAFE_VEHICLE_VELOCITY_TO_GO_FORWARD;
 
-CANMsg MotorControlTask::getMotorPower(){
-	return this->motor_power_msg;
-}
+        const bool reverseSafe = v0 <= SAFE_VEHICLE_VELOCITY_TO_GO_REVERSE &&
+                                 v1 <= SAFE_VEHICLE_VELOCITY_TO_GO_REVERSE;
 
+        // Handle Driver Inputs
+        DriveLogic::Inputs in;
+        in.direction = decodeDirection(driverInputs);
 
-// Returns motor current setpoint as a fraction (0.0 to 1.0) 
-// of the Controller's configured max
-float MotorControlTask::calculateMotorCurrent(float accelPercentage)
-{
-    // To avoid a software overcurrent, our motor config
-    // is set to have 100 A max current, we scale it so we send 69 A
-    // on full pedal press
-
-    if ((accelPercentage - NON_ZERO_THRESHOLD) > 0 )
-    {
-        return (accelPercentage - NON_ZERO_THRESHOLD)
-               / (MAX_PEDAL_THRESHOLD - NON_ZERO_THRESHOLD)
-               * MOTOR_PERCENTAGE_REDUCER;
-    }
-    else
-    {
-        return 0.0;
-    }
-}
-
-float MotorControlTask::calculateAccelMotorCurrent(float accelPercentage, float prevMotorCurrent)
-{
-    return calculateMotorCurrent(accelPercentage);
-}
-
-float MotorControlTask::calculateRegenMotorCurrent(float regenPercentage, float prevMotorCurrent)
-{
-    // Scale presentMotorCurrent by REGEN_INPUT_SCALING because regen uses less current than normal acceleration. Motors will trip if current is greater.
-    float presentMotorCurrent = calculateMotorCurrent(regenPercentage) * REGEN_INPUT_SCALING;
-    return presentMotorCurrent;//lowPassFilter(presentMotorCurrent, prevMotorCurrent);
-}
-
-uint8_t MotorControlTask::vehicleVelocitySafeToGoForward()
-{
-    // Returns true if velocity is high enough to go forward
-    return (motor0VehicleVelocityInput >= SAFE_VEHICLE_VELOCITY_TO_GO_FORWARD && 
-            motor1VehicleVelocityInput >= SAFE_VEHICLE_VELOCITY_TO_GO_FORWARD);
-	// return 1;
-}
-
-uint8_t MotorControlTask::vehicleVelocitySafeToGoReverse()
-{
-    // Returns true if velocity is negative enough to reverse
-    return (motor0VehicleVelocityInput <= SAFE_VEHICLE_VELOCITY_TO_GO_REVERSE && 
-            motor1VehicleVelocityInput <= SAFE_VEHICLE_VELOCITY_TO_GO_REVERSE);
-
-	// return 1;
-}
-
-uint8_t MotorControlTask::isNewDirectionSafe(uint8_t forward, uint8_t reverse)
-{
-    if (forward && reverse) {
-        // Forward and reverse gear at the same time, not safe
-        return 0;
-    }
-
-    if (forward) {
-        // Forward gear and vehicle velocity is safe to go
-        return vehicleVelocitySafeToGoForward();
-
-    } else if (reverse) {
-        // Reverse gear and vehicle velocity is safe to go
-        return vehicleVelocitySafeToGoReverse();
-
-    } else {
-        // default case, not safe, likely Neutral
-        return 0
-    }
-}
-
-void MotorControlTask::sendDriveCommands(uint32_t* prevWakeTimePtr,
-                       DriveCommandsInfo* driveCommandsInfo,
-                       uint32_t* switching)
-{
-    osDelay(100);
-
-    /*
-    ---------- ADC Pedal Sampling ----------
-    1. Read pedal percentages
-    2. calculate average pedal percentages from the buffer
-    */
-
-    // Get pedal percentages
-    float regenPercentage = static_cast<float>(PedalsInputTask::Inst().GetRegenPercentage());
-    float accelPercentage = static_cast<float>(PedalsInputTask::Inst().GetAccelPercentage());
-
-    /*
-     * ACTIVE LOW !!!!!!!!!
-     * UNUSED	= 11
-     * Drive	= 01
-     * Neutral	= 10
-     * Reverse	= 00
-     * */
-    uint8_t driver_inputs_state = DigitalInputsTask::Inst().GetDriverInputs();
-    uint8_t forward     = (driver_inputs_state >> 0) & 1U; 	    // Bit 0
-    uint8_t reverse     = (driver_inputs_state >> 2) & 1U; 	    // Bit 2
-    uint8_t mech_brake  = (driver_inputs_state >> 3) & 1U;	        // Bit 3
-    uint8_t reset       = (driver_inputs_state >> 4) & 1U;			// Bit 4
-
-#if HARDCODE
-    // NOTE: Hard coding GPIO values for now
-    uint8_t forward = 0;
-    uint8_t reverse = 1;
-    uint8_t mech_brake = 1; // Mechanical Brake
-    uint8_t reset = 1; // Reset Button
-
-    uint8_t allowCharge = 1;
-    uint8_t allowDischarge = 1;
-#endif
-
-    /*--------------- Determine Data to Send ---------------*/
-    float motorVelocityOut; // RPM
-    if (!isNewDirectionSafe(forward, reverse)) {
-        // If gear shifter is bad, turn off the motor
-        motorVelocityOut = 0;
-        driveCommandsInfo->motorCurrentOut = 0;
-
-#if DEBUG_PRINTS
-    CUBE_PRINT("MOTOR GPIO STATE %d\n", driver_inputs_state);
-    CUBE_PRINT("FORWARD %d\n", forward);
-    CUBE_PRINT("REVERSE %d\n", reverse);
-    CUBE_PRINT("MECH_BR %d\n", mech_brake);
-    CUBE_PRINT("RESET   %d\n", reset);
-
-    CUBE_PRINT("MOTOR STATE: %d\n" , driveCommandsInfo->motorState);
-    CUBE_PRINT("FWD %d, REV %d\n", forward, reverse);
-#endif
-
-    } else if (driveCommandsInfo->resetStatus == SettingReset) {
-        // If reset button is pressed, set motorState to Off and motorCurrentOut to 0
-        driveCommandsInfo->motorCurrentOut = calculateRegenMotorCurrent(0, driveCommandsInfo->motorCurrentOut);
+        in.accelPercent = static_cast<float>(PedalsInputTask::Inst().GetAccelPercentage());
+        in.regenPercent = static_cast<float>(PedalsInputTask::Inst().GetRegenPercentage());
         
-        if (driveCommandsInfo->motorCurrentOut < SWITCHING_CURRENT) {
-            driveCommandsInfo->resetStatus = Resetting;
-            driveCommandsInfo->motorCurrentOut = 0;
+        in.mechBrake = isPressed(driverInputs, BIT_MECH_BRAKE);
+        in.fwdSafe = forwardSafe;
+        in.revSafe = reverseSafe;
+        
+        in.allowCharge = allowCharge;
+        in.allowDischarge = allowDischarge;
+
+        const bool resetPressed = isPressed(driverInputs, BIT_RESET);
+        const bool resetRequested = resetPressed && !prevResetPressed;
+        prevResetPressed = resetPressed;
+
+        DriveLogic::Output out = DriveLogic::DriveLogic(state, in, cfg);
+        if (resetRequested){
+            out = DriveLogic::Output(); // command zero before resetting
+            state.mode = DriveLogic::Mode::Off;
         }
 
-    } else if (regenPercentage > NON_ZERO_THRESHOLD) {
-        // Regen state
-        // To stop using regen braking, set motorCurrentOut to desired value and zero motorVelocityOut
-        // To stop without regen braking, zero both motorCurrentOut and motorVelocityOut
-        // https://tritium.com.au/includes/TRI88.004v4-Users-Manual.pdf - Section 13
+        // Motor Drive: velocity [rpm], current [percent of max 0.0f...1.0f]
+        sendMotor(motor_drive_msg, MOTOR_DRIVE_INPUT, out.rpm, clamp(out.current));
 
-        if (driveCommandsInfo->motorState != RegenBraking) {
-            *switching = 1;
+        // Motor Power: reserved, bus current
+        sendMotor(motor_power_msg, MOTOR_POWER_INPUT, 0.0f, clamp(BUS_CURRENT_OUT));
+
+        if (resetRequested){
+            CUBE_PRINT("Resetting Motors\n");
+            CANTxTask::Inst().SendCommand(Command(TASK_SPECIFIC_COMMAND, MOTOR_RESET_INPUT));
         }
 
-        driveCommandsInfo->motorState = RegenBraking;
-
-        if (*switching) {
-            // If regen to accel, set regen percentage to 0
-            driveCommandsInfo->motorCurrentOut = static_cast<float>(PedalsInputTask::Inst().GetRegenPercentage()) / 100.f;
-
-            if (driveCommandsInfo->motorCurrentOut < SWITCHING_CURRENT) {
-                // reset switching flag after switching
-                *switching = 0;
-                driveCommandsInfo->motorCurrentOut = 0;
-            }
-
-        } else {
-            motorVelocityOut = 0.5f;
-            // Allow regen braking based on input from AuxBMS
-            if (allowCharge) {
-                driveCommandsInfo->motorCurrentOut = calculateRegenMotorCurrent(
-                                                        regenPercentage,
-                                                        driveCommandsInfo->motorCurrentOut
-                                                    );
-
-            } else {
-                // If AuxBMS does not allow charging, set motorCurrentOut to 0
-                driveCommandsInfo->motorCurrentOut = 0;
-            }
-        }
-    } else if (mech_brake) {
-        // If mechanical is pressed, set motorState to MechanicalBraking and motorCurrentOut to 0
-        driveCommandsInfo->motorState = MechanicalBraking;
-        motorVelocityOut = 0;
-        driveCommandsInfo->motorCurrentOut = 0;
-
-    } else if (accelPercentage > NON_ZERO_THRESHOLD) {
-        // Accel state (drive state)
-
-        if(driveCommandsInfo->motorState != Accelerating) {
-            *switching = 1;
-        }
-
-        driveCommandsInfo->motorState = Accelerating;
-
-        if(*switching) {
-            // If accel to regen, set accel percentage to 0
-            driveCommandsInfo->motorCurrentOut = static_cast<float>(PedalsInputTask::Inst().GetAccelPercentage()) / 100.f;
-
-            if(driveCommandsInfo->motorCurrentOut < SWITCHING_CURRENT) {
-                // reset switching flag after switching
-                *switching = 0;
-                driveCommandsInfo->motorCurrentOut = 0;
-            }
-
-        } else {
-
-            if (forward && allowDischarge) {
-                // Forward and Discharge is allowed
-                driveCommandsInfo->motorState = Accelerating;
-                motorVelocityOut = MAX_FORWARD_RPM; // FAR FUTURE TODO: Based on ADC LOL (needs math, Omar's curve fitting) - Dom
-
-                driveCommandsInfo->motorCurrentOut = calculateAccelMotorCurrent(
-                                                        accelPercentage,
-                                                        driveCommandsInfo->motorCurrentOut
-                                                    );
-
-            } else if (reverse && allowDischarge) {
-                // Reverse and Discharge is allowed
-                driveCommandsInfo->motorState = Accelerating;
-                motorVelocityOut = MAX_REVERSE_RPM; // FAR FUTURE TODO: Based on ADC - Dom
-
-                driveCommandsInfo->motorCurrentOut = calculateAccelMotorCurrent(
-                                                        accelPercentage,
-                                                        driveCommandsInfo->motorCurrentOut
-                                                    );
-            } else {
-                // If neither forward nor reverse
-                // If discharge is not allowed, set motorState to Off
-                driveCommandsInfo->motorState = Off;
-                motorVelocityOut = 0.f;
-                driveCommandsInfo->motorCurrentOut = 0;
-            }
-        }
-    } else {
-        // Off state
-        if(driveCommandsInfo->motorState != Off) {
-            *switching = 1;
-        }
-
-        driveCommandsInfo->motorState = Off;
-
-        if(*switching) {
-            driveCommandsInfo->motorCurrentOut = 0.f;
-
-            if(driveCommandsInfo->motorCurrentOut < SWITCHING_CURRENT) {
-                *switching = 0;
-                driveCommandsInfo->motorCurrentOut = 0;
-            }
-
-        } else {
-        	driveCommandsInfo->motorState = Off;
-        	motorVelocityOut = 0.f;
-        	driveCommandsInfo->motorCurrentOut = 0.f;
-        }
-    }
-
-    // Reset input velocities to default
-    // This is TEMPORARY. Should be a fix for this that does a better job of determining if the velocities that were received
-    // are stale values. i.e. motor controllers haven't transmitted a message in a while
-    motorVehicleVelocityInput = 0.0f;
-
-    // Transmit Motor Drive command
-    float dataToSendFloat[2] = {0};
-    // ADD EXTENDED ID HERE IF NEEDED
-    dataToSendFloat[0] = motorVelocityOut;
-    dataToSendFloat[1] = driveCommandsInfo->motorCurrentOut;
-    memcpy(&motor_drive_msg.data[0], &dataToSendFloat[0], sizeof(float) * 2);
-
-    Command driveCommand = Command(TASK_SPECIFIC_COMMAND, MOTOR_DRIVE_INPUT);
-    driveCommand.CopyDataToCommand(
-    		reinterpret_cast<uint8_t*>(dataToSendFloat),
-			sizeof(dataToSendFloat));
-    CANTxTask::Inst().SendCommandReference(driveCommand);
-
-    // Transmit Motor Power command
-    // ADD EXTENDED ID HERE IF NEEDED
-    dataToSendFloat[0] = 0.0f; // Reserved (WaveSculptor datasheet)
-    dataToSendFloat[1] = BUS_CURRENT_OUT; // ??? From original Elysia Code
-    memcpy(&motor_power_msg.data[0], &dataToSendFloat[0], sizeof(float) * 2);
-
-    Command powerCommand = Command(TASK_SPECIFIC_COMMAND, MOTOR_POWER_INPUT);
-    powerCommand.CopyDataToCommand(
-    		reinterpret_cast<uint8_t*>(dataToSendFloat),
-			sizeof(dataToSendFloat));
-    CANTxTask::Inst().SendCommandReference(powerCommand);
-
-#if DEBUG_PRINTS
-    CUBE_PRINT("SWITCHING %d\n", *switching);
-    for(int i =  0; i < 8; i++){
-        CUBE_PRINT("MOTOR_DRIVE_MSG[%d] %d\n", i, motor_drive_msg.data[i]);
-    }
-#endif
-
-    // Transmit Motor Reset command if button switch went from off to on
-    // `!` for active low
-
-    if (driveCommandsInfo->prevResetInput && reset)
-    {
-        driveCommandsInfo->resetStatus = SettingReset;
-    }
-
-    if (driveCommandsInfo->resetStatus == Resetting)
-    {
-    	CUBE_PRINT("Resetting Motors\n");
-        CANTxTask::Inst().SendCommand(Command(TASK_SPECIFIC_COMMAND, MOTOR_RESET_INPUT));
-        driveCommandsInfo->resetStatus = NotResetting;
-    }
-
-    // Update previous state (save current for next frame)
-    driveCommandsInfo->prevResetInput = reset;
-
+    }       
 }
-

@@ -17,10 +17,10 @@ enum class Gear : uint8_t {
 };
 
 struct Config {
-    float fwdPedalDeadzone;
-    float regPedalDeadzone;
+    float accPedalDeadzone; // Deadzone for Acceleration Pedal
+    float regPedalDeadzone; // Deadzone for Regen Pedal
 
-    float pedalMax; 
+    float pedalMax;     // ADC Max
 
     float regenRPM;     // Regen RPM, should be 0
     float maxFwdRPM;    // Max Forward RPM
@@ -28,7 +28,6 @@ struct Config {
 
     float regenScaling; // Scaling Factor for Regen Braking
     float accelScaling; // Scaling Factor for Acceleration
-
 };
 
 struct Inputs {
@@ -50,8 +49,8 @@ struct State {
 };
 
 struct Output {
-    float rpm = 0.0f;
-    float current = 0.0f
+    float rpm = 0.0f;       // target velocity (Usually unreachable, or 0)
+    float current = 0.0f    // target current
 };
 
 Output DriveLogic(State& state, const Inputs& in, const Config& cfg);
