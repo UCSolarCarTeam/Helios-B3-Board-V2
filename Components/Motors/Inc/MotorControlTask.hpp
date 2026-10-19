@@ -27,7 +27,7 @@
 enum MotorStates {
     Accelerating,
     RegenBraking,
-    MechanicalBreaking,
+    MechanicalBraking,
     Off
 };
 
@@ -64,7 +64,6 @@ public:
     uint32_t getAvgRegen();
     uint32_t getAvgAccel();
     float calculateMotorCurrent(float accelPercentage);
-    float lowPassFilter(float presentMotorCurrent, float prevMotorCurrent);
     float calculateAccelMotorCurrent(float accelPercentage, float prevMotorCurrent);
     float calculateRegenMotorCurrent(float regenPercentage, float prevMotorCurrent);
 
@@ -100,10 +99,6 @@ private:
     CANMsg motor_drive_msg;
     CANMsg motor_power_msg;
 };
-
-
-#define REGEN_QUEUE_SIZE 5
-#define ACCEL_QUEUE_SIZE 5
 
 #define BUS_CURRENT_OUT 1.0f // Percentage 0 to 1 (always 100%)
 
