@@ -4,6 +4,7 @@
 
 #define DISABLED 0
 #define DEBUG_PRINTS 0
+#define HARDCODE 0
 
 uint32_t motorVehicleVelocityInput;
 
@@ -64,6 +65,9 @@ CANMsg MotorControlTask::getMotorPower(){
 	return this->motor_power_msg;
 }
 
+
+// Returns motor current setpoint as a fraction (0.0 to 1.0) 
+// of the Controller's configured max
 float MotorControlTask::calculateMotorCurrent(float accelPercentage)
 {
     // To avoid a software overcurrent, our motor config
@@ -82,20 +86,9 @@ float MotorControlTask::calculateMotorCurrent(float accelPercentage)
     }
 }
 
-#if DISABLED
-float MotorControlTask::lowPassFilter(float presentMotorCurrent, float prevMotorCurrent)
-{
-    // Essentially a simple IIR low pass filter, which is a system that resists change.
-    // The purpose is to smooth the output current so that there aren't any big jumps that could cause the motors to trip.
-    // The MOTOR_CURRENT_SMOOTHING_FACTOR determines how resistant the low pass filter is to change
-    //Disappointing
-    return prevMotorCurrent + MOTOR_CURRENT_SMOOTHING_FACTOR * (presentMotorCurrent - prevMotorCurrent);
-}
-#endif
-
 float MotorControlTask::calculateAccelMotorCurrent(float accelPercentage, float prevMotorCurrent)
 {
-    return calculateMotorCurrent(accelPercentage);//lowPassFilter(calculateMotorCurrent(accelPercentage), prevMotorCurrent);
+    return calculateMotorCurrent(accelPercentage);
 }
 
 float MotorControlTask::calculateRegenMotorCurrent(float regenPercentage, float prevMotorCurrent)
@@ -107,31 +100,39 @@ float MotorControlTask::calculateRegenMotorCurrent(float regenPercentage, float 
 
 uint8_t MotorControlTask::vehicleVelocitySafeToGoForward()
 {
-    return (motor0VehicleVelocityInput >= SAFE_VEHICLE_VELOCITY_TO_GO_FORWARD && motor1VehicleVelocityInput >= SAFE_VEHICLE_VELOCITY_TO_GO_FORWARD);
-    // return (CANRxTask::Inst().getMotorVehicleVelocityInput() >= SAFE_VEHICLE_VELOCITY_TO_GO_FORWARD);
+    // Returns true if velocity is high enough to go forward
+    return (motor0VehicleVelocityInput >= SAFE_VEHICLE_VELOCITY_TO_GO_FORWARD && 
+            motor1VehicleVelocityInput >= SAFE_VEHICLE_VELOCITY_TO_GO_FORWARD);
 	// return 1;
 }
 
 uint8_t MotorControlTask::vehicleVelocitySafeToGoReverse()
 {
-    return (motor0VehicleVelocityInput <= SAFE_VEHICLE_VELOCITY_TO_GO_REVERSE && motor1VehicleVelocityInput <= SAFE_VEHICLE_VELOCITY_TO_GO_REVERSE);
-    // return (CANRxTask::Inst().getMotorVehicleVelocityInput() <= SAFE_VEHICLE_VELOCITY_TO_GO_REVERSE);
-	return 1;
+    // Returns true if velocity is negative enough to reverse
+    return (motor0VehicleVelocityInput <= SAFE_VEHICLE_VELOCITY_TO_GO_REVERSE && 
+            motor1VehicleVelocityInput <= SAFE_VEHICLE_VELOCITY_TO_GO_REVERSE);
+
+	// return 1;
 }
 
 uint8_t MotorControlTask::isNewDirectionSafe(uint8_t forward, uint8_t reverse)
 {
     if (forward && reverse) {
-        // Forward and reverse pressed at the same time, not safe
+        // Forward and reverse gear at the same time, not safe
         return 0;
+    }
 
-    } else if ((forward && vehicleVelocitySafeToGoForward()) || (reverse && vehicleVelocitySafeToGoReverse())){
-        // Forward or reverse pressed and vehicle velocity is safe to go in that direction
-        return 1;
+    if (forward) {
+        // Forward gear and vehicle velocity is safe to go
+        return vehicleVelocitySafeToGoForward();
+
+    } else if (reverse) {
+        // Reverse gear and vehicle velocity is safe to go
+        return vehicleVelocitySafeToGoReverse();
 
     } else {
         // default case, not safe, likely Neutral
-        return 0;
+        return 0
     }
 }
 
@@ -151,10 +152,6 @@ void MotorControlTask::sendDriveCommands(uint32_t* prevWakeTimePtr,
     float regenPercentage = static_cast<float>(PedalsInputTask::Inst().GetRegenPercentage());
     float accelPercentage = static_cast<float>(PedalsInputTask::Inst().GetAccelPercentage());
 
-#if DEBUG_PRINTS
-    CUBE_PRINT("ACCEL PERCENT %d\n", static_cast<int>(accelPercentage));
-#endif
-
     /*
      * ACTIVE LOW !!!!!!!!!
      * UNUSED	= 11
@@ -167,48 +164,34 @@ void MotorControlTask::sendDriveCommands(uint32_t* prevWakeTimePtr,
     uint8_t reverse     = (driver_inputs_state >> 2) & 1U; 	    // Bit 2
     uint8_t mech_brake  = (driver_inputs_state >> 3) & 1U;	        // Bit 3
     uint8_t reset       = (driver_inputs_state >> 4) & 1U;			// Bit 4
-    
-#if DEBUG_PRINTS
-   CUBE_PRINT("MOTOR GPIO STATE %d\n", driver_inputs_state);
-   CUBE_PRINT("FORWARD %d\n", forward);
-   CUBE_PRINT("REVERSE %d\n", reverse);
-   CUBE_PRINT("MECH_BR %d\n", mech_brake);
-   CUBE_PRINT("RESET   %d\n", reset);
-   CUBE_PRINT("MOTOR STATE: %d\n" , driveCommandsInfo->motorState);
-#endif
 
-//    // NOTE: Hard coding GPIO values for now
-//    uint8_t forward = 0;
-//    uint8_t reverse = 1;
-//    uint8_t mech_brake = 1; // Mechanical Brake
-//    uint8_t reset = 1; // Reset Button
+#if HARDCODE
+    // NOTE: Hard coding GPIO values for now
+    uint8_t forward = 0;
+    uint8_t reverse = 1;
+    uint8_t mech_brake = 1; // Mechanical Brake
+    uint8_t reset = 1; // Reset Button
 
-#if 0
-
-    /* TODO: Add switch case handle for CANRx Task to receive AuxBMS states */
-    // Read AuxBMS messages
-
-    uint8_t allowCharge =
-    		1;
-//    		CANRxTask::Inst().getAllowCharge();    // comment out to hardcode
-
-    uint8_t allowDischarge =
-    		1;
-//			CANRxTask::Inst().getAllowDischarge(); // comment out to hardcode
-
-//    CUBE_PRINT("MOTOR CONTROL ALLOW CHARGE    %d\n", allowCharge);
-//    CUBE_PRINT("MOTOR CONTROL ALLOW DISCHARGE %d\n", allowDischarge);
+    uint8_t allowCharge = 1;
+    uint8_t allowDischarge = 1;
 #endif
 
     /*--------------- Determine Data to Send ---------------*/
     float motorVelocityOut; // RPM
     if (!isNewDirectionSafe(forward, reverse)) {
+        // If gear shifter is bad, turn off the motor
         motorVelocityOut = 0;
         driveCommandsInfo->motorCurrentOut = 0;
 
 #if DEBUG_PRINTS
-       CUBE_PRINT("UNSAFE, APPARENTLY\n");
-       CUBE_PRINT("FWD %d, REV %d\n", forward, reverse);
+    CUBE_PRINT("MOTOR GPIO STATE %d\n", driver_inputs_state);
+    CUBE_PRINT("FORWARD %d\n", forward);
+    CUBE_PRINT("REVERSE %d\n", reverse);
+    CUBE_PRINT("MECH_BR %d\n", mech_brake);
+    CUBE_PRINT("RESET   %d\n", reset);
+
+    CUBE_PRINT("MOTOR STATE: %d\n" , driveCommandsInfo->motorState);
+    CUBE_PRINT("FWD %d, REV %d\n", forward, reverse);
 #endif
 
     } else if (driveCommandsInfo->resetStatus == SettingReset) {
@@ -257,8 +240,8 @@ void MotorControlTask::sendDriveCommands(uint32_t* prevWakeTimePtr,
             }
         }
     } else if (mech_brake) {
-        // If mechanical is pressed, set motorState to MechanicalBreaking and motorCurrentOut to 0
-        driveCommandsInfo->motorState = MechanicalBreaking;
+        // If mechanical is pressed, set motorState to MechanicalBraking and motorCurrentOut to 0
+        driveCommandsInfo->motorState = MechanicalBraking;
         motorVelocityOut = 0;
         driveCommandsInfo->motorCurrentOut = 0;
 
