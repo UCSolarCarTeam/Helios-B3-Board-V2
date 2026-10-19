@@ -16,7 +16,10 @@
 
 /* Macros/Enums ------------------------------------------------------------*/
 enum CANRX_COMMANDS {
-    TEST_COMMAND
+    TEST_RX_COMMAND,
+    MBMS_STATUS,
+	MOTOR0_VELOCITY_MEASUREMENT,
+	MOTOR1_VELOCITY_MEASUREMENT
 };
 
 /* Class ------------------------------------------------------------------*/

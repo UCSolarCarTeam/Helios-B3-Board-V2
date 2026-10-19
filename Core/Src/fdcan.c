@@ -53,27 +53,45 @@ void MX_FDCAN2_Init(void)
   hfdcan2.Init.DataTimeSeg1 = 1;
   hfdcan2.Init.DataTimeSeg2 = 1;
   hfdcan2.Init.StdFiltersNbr = 0;
-  hfdcan2.Init.ExtFiltersNbr = 1;
+  hfdcan2.Init.ExtFiltersNbr = 2;
   hfdcan2.Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
   if (HAL_FDCAN_Init(&hfdcan2) != HAL_OK)
   {
     Error_Handler();
   }
   /* USER CODE BEGIN FDCAN2_Init 2 */
-  FDCAN_FilterTypeDef sFilterConfig;
-  sFilterConfig.IdType = FDCAN_EXTENDED_ID;
-  sFilterConfig.FilterIndex = 0;
-  sFilterConfig.FilterType = FDCAN_FILTER_MASK;
-  sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-  sFilterConfig.FilterID1 = 0x00000000;
-  sFilterConfig.FilterID2 = 0x00000000;
-  
-  HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig);
-  if (HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfig) != HAL_OK)
+
+  // MBMS Status Filter
+  FDCAN_FilterTypeDef sFilterConfigMBMS;
+  sFilterConfigMBMS.IdType = FDCAN_EXTENDED_ID;
+  sFilterConfigMBMS.FilterIndex = 0;
+  sFilterConfigMBMS.FilterType = FDCAN_FILTER_MASK;
+  sFilterConfigMBMS.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+  sFilterConfigMBMS.FilterID1 = 0x102;
+  sFilterConfigMBMS.FilterID2 = 0x1FFFFFFF;
+
+  // Motor Filter
+  FDCAN_FilterTypeDef sFilterConfigMotor;
+  sFilterConfigMotor.IdType = FDCAN_EXTENDED_ID;
+  sFilterConfigMotor.FilterIndex = 1;
+  sFilterConfigMotor.FilterType = FDCAN_FILTER_RANGE;
+  sFilterConfigMotor.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+  sFilterConfigMotor.FilterID1 = 0x400;
+  sFilterConfigMotor.FilterID2 = 0x437;
+
+  if (HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfigMBMS) != HAL_OK)
   {
     /* Filter configuration Error */
     Error_Handler();
   }
+
+#if 0
+  if (HAL_FDCAN_ConfigFilter(&hfdcan2, &sFilterConfigMotor) != HAL_OK)
+  {
+    /* Filter configuration Error */
+    Error_Handler();
+  }
+#endif 
 
   // Start CAN peripheral
   if(HAL_FDCAN_Start(&hfdcan2)!= HAL_OK)

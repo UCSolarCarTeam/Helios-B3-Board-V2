@@ -8,6 +8,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "CanTxTask.hpp"
 #include "stm32h5xx_hal_fdcan.h"
+#include <string.h>
 
 /**
  * @brief Constructor for CANTxTask
@@ -60,33 +61,82 @@ void CANTxTask::Run(void* pvParams) {
  */
 void CANTxTask::HandleCommand(Command& cm) {
 
+    FDCAN_TxHeaderTypeDef txHeader;
+    uint8_t txData[8];
+    
+    // Allocate data into Tx Buffer if it exists
+    uint16_t dataLength = cm.GetDataSize();
+    if (dataLength != 0) {
+        memcpy(txData, cm.GetDataPointer(), dataLength);
+    }
+
+    // Set message header parameters
+    txHeader.Identifier = 0x0;
+    txHeader.IdType = FDCAN_EXTENDED_ID;
+    txHeader.TxFrameType = FDCAN_DATA_FRAME;
+    txHeader.DataLength = dataLength;
+    txHeader.ErrorStateIndicator = FDCAN_ESI_ACTIVE;
+    txHeader.BitRateSwitch = FDCAN_BRS_OFF;
+    txHeader.FDFormat = FDCAN_CLASSIC_CAN;
+    txHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
+    txHeader.MessageMarker = 0;
+
 	// Handle CAN message based on ID
 	switch (static_cast<CANTX_COMMANDS>(cm.GetTaskCommand())) {
         case HEARTBEAT:
+            txHeader.Identifier = 0x700;
             break;
 
-        case DIGITAL_INPUTS:
+        case DRIVER_INPUTS:
+            txHeader.Identifier = 0x710;
             break;
             
         case ANALOG_INPUTS:
+            txHeader.Identifier = 0x711;
             break;
 
         case LIGHTS_INPUTS:
+            txHeader.Identifier = 0x720;
             break;
 
         case LIGHTS_STATUS:
+            txHeader.Identifier = 0x721;
             break;
 
-        case GPS:
+        case GPS_TIME:
+            txHeader.Identifier = 0x730;
+            break;
+
+        case GPS_FLAGS:
+            txHeader.Identifier = 0x731;
+            break;
+
+        case GPS_POSITION:
+            txHeader.Identifier = 0x732;
             break;
 
         case MPU_ACCEL:
+            txHeader.Identifier = 0x733;
             break;
 
         case MPU_GYRO:
+            txHeader.Identifier = 0x734;
             break;
 
         case MPU_TEMP:
+            txHeader.Identifier = 0x735;
+            break;
+        
+        case MOTOR_DRIVE_INPUT:
+            txHeader.Identifier = 0x501;
+            break;
+
+        case MOTOR_POWER_INPUT:
+            txHeader.Identifier = 0x502;
+            break;
+
+        case MOTOR_RESET_INPUT:
+            txHeader.Identifier = 0x503;
             break;
 		
         default:
@@ -94,5 +144,14 @@ void CANTxTask::HandleCommand(Command& cm) {
 			// CUBE_PRINT_CAN_MESSAGE(cm.GetTaskCommand(), cm.GetDataSize(), cm.GetDataPointer());
 			break;
 	}
+
+    if (txHeader.Identifier != 0) {
+        if (HAL_FDCAN_AddMessageToTxFifoQ(SystemHandles::FDCAN_Handle, &txHeader, txData)!= HAL_OK) {
+            __NOP();
+        	// Error_Handler();
+        }
+    }
+
+    cm.Reset();
 }
 

@@ -21,6 +21,7 @@
 #include "PedalsInputTask.hpp"
 #include "LightsOutputTask.hpp"
 #include "DigitalInputsTask.hpp"
+#include "MotorControlTask.hpp"
 
 /* Drivers ------------------------------------------------------------------*/
 namespace Driver {
@@ -36,13 +37,14 @@ void run_main() {
     CubeTask::Inst().InitTask();
     DebugTask::Inst().InitTask();
     WatchdogTask::Inst().InitTask();
-//    CANRxTask::Inst().InitTask();
-//    CANTxTask::Inst().InitTask();
+    CANRxTask::Inst().InitTask();
+    CANTxTask::Inst().InitTask();
 //    ImuReadTask::Inst().InitTask();
     PedalsInputTask::Inst().InitTask();
     PCA9685Task::Inst().InitTask();
     DigitalInputsTask::Inst().InitTask();
-
+    MotorControlTask::Inst().InitTask();
+    
     // Print System Boot Info : Warning, don't queue more than 10 prints before scheduler starts
     CUBE_PRINT("\n-- CUBE SYSTEM --\n");
     CUBE_PRINT("System Reset Reason: [TODO]\n"); //TODO: System reset reason can be implemented via. Flash storage

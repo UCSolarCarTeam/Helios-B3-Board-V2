@@ -34,7 +34,6 @@ enum GLOBAL_COMMANDS : uint8_t
 
 /* Cube++ Optional Code Configuration ------------------------------------------------------------------*/
 
-
 /* Task Parameter Definitions ------------------------------------------------------------------*/
 /* - Lower priority number means lower priority task ---------------------------------*/
 
@@ -83,9 +82,14 @@ constexpr uint8_t GNSSREAD_TASK_RTOS_PRIORITY = 2;
 constexpr uint8_t GNSSREAD_TASK_QUEUE_DEPTH_OBJS = 10;
 constexpr uint16_t GNSSREAD_TASK_STACK_DEPTH_WORDS = 512;
 
-// DIGITALINPUT TASK
+// DIGITAL INPUT TASK
 constexpr uint8_t DIGITAL_INPUTS_TASK_RTOS_PRIORITY = 3;       // Priority of the Digital Input Task
 constexpr uint8_t DIGITAL_INPUTS_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the Digital Input Task queue
 constexpr uint16_t DIGITAL_INPUTS_TASK_STACK_DEPTH_WORDS = 512;    // Size of the Digital Input Task stack
+
+// MOTOR CONTROL TASK
+constexpr uint8_t MOTOR_CONTROL_TASK_RTOS_PRIORITY = 3;       // Priority of the Digital Input Task
+constexpr uint8_t MOTOR_CONTROL_TASK_QUEUE_DEPTH_OBJS = 10;        // Size of the Digital Input Task queue
+constexpr uint16_t MOTOR_CONTROL_TASK_STACK_DEPTH_WORDS = 512;    // Size of the Digital Input Task stack
 
 #endif // CUBE_MAIN_SYSTEM_DEFINES_H

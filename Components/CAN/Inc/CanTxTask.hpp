@@ -16,14 +16,19 @@
 /* Macros/Enums ------------------------------------------------------------*/
 enum CANTX_COMMANDS {
     HEARTBEAT,
-    DIGITAL_INPUTS,
+    DRIVER_INPUTS,
     ANALOG_INPUTS,
     LIGHTS_INPUTS,
     LIGHTS_STATUS,
-    GPS,
+    GPS_TIME,
+    GPS_FLAGS,
+    GPS_POSITION,
     MPU_ACCEL,
     MPU_GYRO,
-    MPU_TEMP
+    MPU_TEMP,
+    MOTOR_DRIVE_INPUT,        // Command for motor drive input
+	MOTOR_POWER_INPUT,        // Command for motor power input
+	MOTOR_RESET_INPUT
 };
 
 /* Class ------------------------------------------------------------------*/
