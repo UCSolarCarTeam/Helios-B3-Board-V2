@@ -86,11 +86,11 @@ private:
     MotorControlTask(const MotorControlTask &);              // Prevent copy-construction
     MotorControlTask &operator=(const MotorControlTask &);   // Prevent assignment
 
-    // Written by the CAN Rx task, read by Run(). Fail-safe defaults: no drive or
-    // regen until the AuxBMS permits it; zero velocity is "safe" in both directions.
+    // From AuxBMS
     volatile bool  allowCharge = false;
     volatile bool  allowDischarge = false;
     
+    // 
     volatile float motor0VehicleVelocityInput = 0.0f;
     volatile float motor1VehicleVelocityInput = 0.0f;
 

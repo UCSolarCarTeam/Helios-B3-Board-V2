@@ -42,6 +42,9 @@ namespace DriveLogic {
 
             } else if (gear == Gear::RegenBraking) {
                 float deadzone = cfg.accPedalDeadzone;
+                
+            } else {
+                return 0.0f
             }
 
             if (pedalPercent <= deadzone) {
