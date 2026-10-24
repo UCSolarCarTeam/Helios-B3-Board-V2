@@ -3,6 +3,7 @@
 
 #include "MotorControlTask.hpp"
 #include "DriveLogic.hpp"
+#include "CANTxTask.hpp"
 
 namespace {
     // 10 Hz
@@ -71,8 +72,7 @@ namespace {
         return a;
     }
 
-    template <typename CommandID>
-    void sendMotor(CANMsg& msg, CommandID commandID, float lowWord, float highWord)
+    void sendMotor(CANMsg& msg, CANTX_COMMANDS commandID, float lowWord, float highWord)
     {
         float data[2] = {lowWord, highWord};
         memcpy(&msg.data[0], &data[0], sizeof(data));
