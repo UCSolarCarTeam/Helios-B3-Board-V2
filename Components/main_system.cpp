@@ -19,7 +19,7 @@
 #include "CanTxTask.hpp"
 #include "ImuReadTask.hpp"
 #include "PedalsInputTask.hpp"
-#include "LightsOutputTask.hpp"
+#include "LightsOutputsTask.hpp"
 #include "DigitalInputsTask.hpp"
 
 /* Drivers ------------------------------------------------------------------*/
@@ -40,8 +40,13 @@ void run_main() {
 //    CANTxTask::Inst().InitTask();
 //    ImuReadTask::Inst().InitTask();
     PedalsInputTask::Inst().InitTask();
-    PCA9685Task::Inst().InitTask();
+    LightsOutputsTask::Inst().InitTask();
     DigitalInputsTask::Inst().InitTask();
+
+    // Mutex Creation
+    Mutex driverInputsMutex;
+    Mutex lightInputsMutex;
+    Mutex pedalInputsMutex;
 
     // Print System Boot Info : Warning, don't queue more than 10 prints before scheduler starts
     CUBE_PRINT("\n-- CUBE SYSTEM --\n");

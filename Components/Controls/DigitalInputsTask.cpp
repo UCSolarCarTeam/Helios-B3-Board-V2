@@ -9,7 +9,9 @@
 /**
  * @brief Constructor for DigitalInputTask
  */
-DigitalInputsTask::DigitalInputsTask() : Task(DIGITAL_INPUTS_TASK_QUEUE_DEPTH_OBJS)
+DigitalInputsTask::DigitalInputsTask() 
+    : Task(DIGITAL_INPUTS_TASK_QUEUE_DEPTH_OBJS),
+    driverInputs{}, lightInputs{}
 {
 }
 
@@ -33,6 +35,64 @@ void DigitalInputsTask::InitTask()
 }
 
 /**
+ * @brief Decodes the driver inputs polled from the IO expander
+ * @param lastread inputs last read from the IO expander
+ */
+static void DecodeDriverInputs(uint16_t lastread) 
+{  
+    if ( !driverInputsMutex.Lock(5) ) {
+        return;
+    }
+
+    driverInputs.motorReset      = (lastread & <static_cast>(InputOffsets::MOTOR_RESET)) != 0;
+    driverInputs.dashboardRotate = (lastread & <static_cast>(InputOffsets::DASHBOARD_ROTATE)) != 0;
+    driverInputs.lapButton       = (lastread & <static_cast>(InputOffsets::LAP_BUTTON)) != 0;
+    driverInputs.mechanicalBrake = (lastread & <static_cast>(InputOffsets::MECHANICAL_BRAKE)) != 0;
+
+    const bool fnrLow       = (lastread & static_cast<uint16_t>(InputOffsets::FNR_LOW)) != 0;
+    const bool fnrHigh      = (lastread & static_cast<uint16_t>(InputOffsets::FNR_HIGH)) != 0;
+
+    // FNR (MAY CHANGE)
+    // 00 reverse
+    // 01 neutral
+    // 10 forward
+    // 11 not implemented
+    if (fnrHigh && fnrLow) {
+        driverInputs.fnrState = FNRState::Invalid;
+    } else if (fnrHigh) {
+        driverInputs.fnrState = FNRState::Forward;
+    } else if (fnrLow) {
+        driverInputs.fnrState = FNRState::Neutral;
+    } else {
+        driverInputs.fnrState = FNRState::Reverse;
+    }
+
+    driverInputsMutex.Unlock();
+
+    return;
+}
+
+/**
+ * @brief Decodes the lights inputs polled from the IO expander
+ * @param lastread inputs last read from the IO expander
+ */
+static void DecodeLightInputs(uint16_t lastread) 
+{  
+    if ( !lightInputsMutex.Lock(5) ) {
+    return;
+    }
+
+    lightInputs.hazard          = (lastread & <static_cast>(InputOffsets::HAZARD)) != 0;
+    lightInputs.horn            = (lastread & <static_cast>(InputOffsets::HORN)) != 0;
+    lightInputs.rightSignal     = (lastread & <static_cast>(InputOffsets::RIGHT_SIGNAL)) != 0;
+    lightInputs.leftSignal      = (lastread & <static_cast>(InputOffsets::LEFT_SIGNAL)) != 0;
+
+    lightInputsMutex.Unlock();
+
+    return;
+}
+
+/**
  * @brief Instance Run loop for the DigitalInputs Task. Polls IO expander and performs appropriate actions.
  * @param pvParams RTOS Passed void parameters, contains a pointer to the object instance, should not be used
  */
@@ -50,16 +110,14 @@ void DigitalInputsTask::Run(void * pvParams)
 	// Initialize IO Expander
     IOE_Init(&hiox);
 
-    // Initialize states
-    driverInputs = 0;
-    lightsInputs = 0;
-    fnrState = 0b11;
-
 	while (1) {
 
-		// Test GPIO Inputs
-#if 0
+        // Get Last read
+        // lasteread = GPA << 8 | GPB
         uint16_t lastread = getLastRead(&hiox);
+		
+#if 0
+        // Test GPIO Inputs
         uint8_t gpa = (lastread >> 8) & 0xFF;
         uint8_t gpb = lastread & 0xFF;
         CUBE_PRINT("GPA0: %d\r\n", (gpa >> 0) & 1);
@@ -81,134 +139,8 @@ void DigitalInputsTask::Run(void * pvParams)
         CUBE_PRINT("GPB7: %d\r\n", (gpb >> 7) & 1);
 #endif 0
         
-        // Get Last read
-        // lasteread = GPA << 8 | GPB
-        uint16_t lastread = getLastRead(&hiox);
-
-        // GPA0
-        // Motor Reset
-        if ((lastread >> 8) & 1) {
-            driverInputs |= (1 << 4);
-            CUBE_PRINT("Motor Reset\r\n");
-        } else {
-            driverInputs &= ~(1 << 4);
-        }
-
-        // GPA1
-        // Left Signal
-        if ((lastread >> 9) & 1) {
-            driverInputs |= (1 << 1);
-            CUBE_PRINT("Left Signal\r\n");
-        } else {
-            driverInputs &= ~(1 << 1);
-        }
-        
-        // GPA2
-        // Horn Signal
-        if ((lastread >> 10) & 1) {
-            driverInputs |= (1 << 5);
-            CUBE_PRINT("Horn Signal\r\n");
-        } else {
-            driverInputs &= ~(1 << 5);
-        }
-
-        // GPA3
-        // Right Signal
-        if ((lastread >> 11) & 1) {
-            driverInputs |= (1 << 0);
-            CUBE_PRINT("Right Signal\r\n");
-        } else {
-            driverInputs &= ~(1 << 0);
-        }
-
-        // GPA4
-        // Dashboard Rotate
-        if ((lastread >> 12) & 1) {
-            driverInputs |= (1 << 6);
-            CUBE_PRINT("Dashboard Rotate\r\n");
-        } else {
-            driverInputs &= ~(1 << 6);
-        }
-
-        // GPA5
-        // Lap Button
-        if ((lastread >> 13) & 1) {
-            driverInputs |= (1 << 7);
-            CUBE_PRINT("Lap Button\r\n");
-        } else {
-            driverInputs &= ~(1 << 7);
-        }
-
-        // GPA6
-        // Forward/Neutral/Reverse Combo 0
-        if ((lastread >> 14) & 1) {
-            // driverInputs |= (1 << );
-            fnrState |= 1;
-            CUBE_PRINT("FWD 0\r\n");
-        } else {
-            fnrState &= ~(1 << 0);
-        }
-
-        // GPA7
-        // Forward/Neutral/Reverse Combo 1
-        if ((lastread >> 15) & 1) {
-            // driverInputs |= (1 << );
-            fnrState |= (1 << 1);
-            CUBE_PRINT("FWD 1\r\n");
-        }   else {
-            fnrState &= ~(1 << 1);
-        }
-
-        // GPB2
-        // Mechanical Brake
-        if ((lastread >> 2) & 1) {
-            driverInputs |= (1 << 3);
-            CUBE_PRINT("Mechanical Brake\r\n");
-        } else {
-            driverInputs &= ~(1 << 3);
-        }
-
-        // GPB3
-        // Emergency Hazard
-        if ((lastread >> 3) & 1) {
-            lightsInputs |= (1 << 2);
-            CUBE_PRINT("Emergency Hazard\r\n");
-        } else {
-            lightsInputs &= ~(1 << 2);
-        }
-
-        // FNR (MAY CHANGE)
-        // 00 reverse
-        // 01 neutral
-        // 10 forward
-        // 11 not implemented
-
-        // Clear Forward, Neutral, Reverse bits first
-        driverInputs &= ~0b111;
-        switch (fnrState)
-        {
-        // REVERSE
-        case 0b00:
-            driverInputs |= (1 << 2);
-            break;
-        
-        // NEUTRAL
-        case 0b01:
-            driverInputs |= (1 << 1);
-            break;
-
-        // FORWARD
-        case 0b10:
-            driverInputs |= (1 << 0);
-            break;
-        
-        // ERROR
-        case 0b11:
-            break;
-
-        default:
-            break;
-        }
+        DecodeDriverInputs(lastread);
+        DecodeLightInputs(lastread);
         
         // Send CAN Messages
 
@@ -217,3 +149,32 @@ void DigitalInputsTask::Run(void * pvParams)
 	}
 }
 
+/**
+ * @brief Getter function that returns a copy of DriverInputs state via reference while being thread-safe.
+ * @param out reference to inputs state to copy into.
+ * @return True or False if copy was successful.
+ */
+bool GetDriverInputs(DriverInputs& out) {
+    if ( !driverInputsMutex.Lock(5) ) {
+        return false;
+    }
+    out = driverInputs;
+    driverInputsMutex.Unlock();
+    return true;
+    
+
+}
+
+/**
+ * @brief Getter function that returns a copy of LightInputs state via reference while being thread-safe
+ * @param out reference to inputs state to copy into
+ */
+bool GetLightInputs(LightInputs& out) {
+    if ( !lightInputsMutex.Lock(5) ) {
+        return false;
+    }
+    out = lightInputs;
+    lightInputsMutex.Unlock();
+    return true;
+    
+}

@@ -1,15 +1,19 @@
 /**
  ******************************************************************************
- * File Name          : PCA9685Task.hpp
+ * File Name          : LightOutputsTask.hpp
  * Description        : Task for controlling the PCA9685 PWM driver.
  ******************************************************************************
 */
-#ifndef HELIOS_PCA9685TASK_HPP_
-#define HELIOS_PCA9685TASK_HPP_
+#ifndef HELIOS_LIGHT_OUTPUTS_TASK_HPP_
+#define HELIOS_LIGHT_OUTPUTS_TASK_HPP_
 
 #include <pca9685.h>
 #include "Task.hpp"
 #include "SystemDefines.hpp"
+
+extern Mutex driverInputsMutex;
+extern Mutex lightInputsMutex;
+extern Mutex pedalInputsMutex;
 
 /* Macros/Enums ------------------------------------------------------------*/
 enum PCA9685_COMMANDS {
@@ -23,33 +27,33 @@ enum PCA9685_COMMANDS {
 	PCA9685_SET_OUTPUT_MASK // Applies the vehicle lights and horn bitmask
 };
 
-class PCA9685Task : public Task
+/* Class ------------------------------------------------------------------*/
+class LightOutputsTask : public Task
 {
 public:
-    static PCA9685Task& Inst() {
-        static PCA9685Task inst;
+    static LightOutputsTask& Inst() {
+        static LightOutputsTask inst;
         return inst;
     }
 
     void InitTask();
 
 protected:
-    static void RunTask(void* pvParams) { PCA9685Task::Inst().Run(pvParams); } // Static Task Interface, passes control to the instance Run();
+    static void RunTask(void* pvParams) { LightOutputsTask::Inst().Run(pvParams); } // Static Task Interface, passes control to the instance Run();
     void Run(void* pvParams); // Main run code
-
     void HandleCommand(Command& cm);
 
 private:
     // Private Functions
     HAL_StatusTypeDef ApplyLightCommand(uint8_t lightcommand);
 
-    PCA9685Task();                                      // Private constructor
-    PCA9685Task(const PCA9685Task&);                    // Prevent copy-construction
-    PCA9685Task& operator=(const PCA9685Task&);         // Prevent assignment
+    LightOutputsTask();                                      // Private constructor
+    LightOutputsTask(const LightOutputsTask&);                    // Prevent copy-construction
+    LightOutputsTask& operator=(const LightOutputsTask&);         // Prevent assignment
 
     // Private Variables
     PCA9685_HandleTypeDef hpca;                         // PCA9685 driver handle
     bool pcaReady;                                      // True after complete initialization
 };
 
-#endif // HELIOS_PCA9685TASK_HPP_
+#endif // HELIOS_LIGHT_OUTPUTS_TASK_HPP_

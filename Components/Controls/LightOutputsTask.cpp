@@ -1,13 +1,13 @@
 /**
  ******************************************************************************
- * File Name          : LightsOutputTask.cpp
+ * File Name          : LightsOutputsTask.cpp
  * Description        : Task for controlling the vehicle lights and horn.
  ******************************************************************************
 */
 #include "SystemDefines.hpp"
-#include "LightsOutputTask.hpp"
+#include "LightOutputsTask.hpp"
 #include "DigitalInputsTask.hpp"
-#include "PedalsInputTask.hpp"
+#include "PedalInputsTask.hpp"
 #include "pca9685.h"
 
 /* Constants ---------------------------------------------------------------*/
@@ -68,9 +68,9 @@ static void SetRightSignal(PCA9685_HandleTypeDef* hpca, bool blinkState) {
 }
 
 /**
- * @brief Constructor for PCA9685Task
+ * @brief Constructor for LightsOutputsTask
  */
-PCA9685Task::PCA9685Task()
+LightsOutputsTask::LightsOutputsTask()
     : Task(PCA9685_TASK_QUEUE_DEPTH_OBJS),
       hpca{},
       pcaReady(false)
@@ -78,9 +78,9 @@ PCA9685Task::PCA9685Task()
 }
 
 /**
- * @brief Initialize the PCA9685Task
+ * @brief Initialize the LightsOutputsTask
  */
-void PCA9685Task::InitTask()
+void LightsOutputsTask::InitTask()
 {
     CUBE_ASSERT(
         rtTaskHandle == nullptr,
@@ -88,8 +88,8 @@ void PCA9685Task::InitTask()
 
     BaseType_t rtValue =
         xTaskCreate(
-            (TaskFunction_t)PCA9685Task::RunTask,
-            (const char*)"PCA9685Task",
+            (TaskFunction_t)LightsOutputsTask::RunTask,
+            (const char*)"LightsOutputsTask",
             (uint16_t)PCA9685_TASK_STACK_DEPTH_WORDS,
             (void*)this,
             (UBaseType_t)PCA9685_TASK_RTOS_PRIORITY,
@@ -97,7 +97,7 @@ void PCA9685Task::InitTask()
 
     CUBE_ASSERT(
         rtValue == pdPASS,
-        "PCA9685Task::InitTask() - xTaskCreate() failed");
+        "LightsOutputsTask::InitTask() - xTaskCreate() failed");
 }
 
 /**
@@ -105,7 +105,7 @@ void PCA9685Task::InitTask()
  * @param lightCommand Bitmask containing the requested output states
  * @return HAL_OK if every output was updated successfully
  */
-HAL_StatusTypeDef PCA9685Task::ApplyLightCommand(uint8_t lightCommand)
+HAL_StatusTypeDef LightsOutputsTask::ApplyLightCommand(uint8_t lightCommand)
 {
     if (!pcaReady) {
         return HAL_ERROR;
@@ -118,7 +118,7 @@ HAL_StatusTypeDef PCA9685Task::ApplyLightCommand(uint8_t lightCommand)
     for (uint8_t i = 0U; i < OUTPUT_COUNT; ++i) {
         if (OUTPUT_CHANNELS[i] > 15U) {
             CUBE_PRINT(
-                "PCA9685Task - Output channel %u is unassigned\r\n",
+                "LightsOutputsTask - Output channel %u is unassigned\r\n",
                 i);
             return HAL_ERROR;
         }
@@ -153,7 +153,7 @@ HAL_StatusTypeDef PCA9685Task::ApplyLightCommand(uint8_t lightCommand)
  * @brief Handle a command received through the task queue
  * @param cm Command to process
  */
-void PCA9685Task::HandleCommand(Command& cm)
+void LightsOutputsTask::HandleCommand(Command& cm)
 {
     if ((cm.GetCommand() == TASK_SPECIFIC_COMMAND) &&
         (cm.GetTaskCommand() == PCA9685_SET_OUTPUT_MASK)) {
@@ -161,21 +161,21 @@ void PCA9685Task::HandleCommand(Command& cm)
         if ((cm.GetDataPointer() == nullptr) ||
             (cm.GetDataSize() != sizeof(uint8_t))) {
             CUBE_PRINT(
-                "PCA9685Task - Invalid light command payload\r\n");
+                "LightsOutputsTask - Invalid light command payload\r\n");
         }
         else {
             uint8_t lightCommand = cm.GetDataPointer()[0];
 
             if (ApplyLightCommand(lightCommand) != HAL_OK) {
                 CUBE_PRINT(
-                    "PCA9685Task - Failed to apply command 0x%02X\r\n",
+                    "LightsOutputsTask - Failed to apply command 0x%02X\r\n",
                     lightCommand);
             }
         }
     }
     else {
         CUBE_PRINT(
-            "PCA9685Task - Received unsupported command\r\n");
+            "LightsOutputsTask - Received unsupported command\r\n");
     }
 
     cm.Reset();
@@ -185,9 +185,9 @@ void PCA9685Task::HandleCommand(Command& cm)
  * @brief Main run loop for the PCA9685 task
  * @param pvParams RTOS task parameters
  */
-void PCA9685Task::Run(void* pvParams)
+void LightsOutputsTask::Run(void* pvParams)
 {
-    CUBE_PRINT("PCA9685Task - Starting initialization\r\n");
+    CUBE_PRINT("LightsOutputsTask - Starting initialization\r\n");
 
     /*
      * Initialize the class member hpca.
@@ -201,11 +201,11 @@ void PCA9685Task::Run(void* pvParams)
 
     if (status != HAL_OK) {
         pcaReady = false;
-        CUBE_PRINT("PCA9685Task - PCA9685 initialization failed\r\n");
+        CUBE_PRINT("LightsOutputsTask - PCA9685 initialization failed\r\n");
     }
     else {
         pcaReady = true;
-        CUBE_PRINT("PCA9685Task - PCA9685 initialization complete\r\n");
+        CUBE_PRINT("LightsOutputsTask - PCA9685 initialization complete\r\n");
     }
 
     // Signal States

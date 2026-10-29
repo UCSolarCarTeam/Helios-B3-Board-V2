@@ -1,10 +1,10 @@
 /**
  ******************************************************************************
- * File Name          : PedalsInputTask.hpp
+ * File Name          : PedalInputsTask.hpp
  * Description        : Samples the positive and negative channels for acceleration and regen braking pedals.
  ******************************************************************************
 */
-#include "PedalsInputTask.hpp"
+#include "PedalInputsTask.hpp"
 #include <algorithm>
 
 #define PEDAL_MIN 1600U
@@ -28,36 +28,41 @@ static uint8_t MapAdcToPercent(uint16_t adc, uint16_t min, uint16_t max)
 }
 
 /**
- * @brief Constructor for PedalsInputTask
+ * @brief Constructor for PedalInputsTask
  */
-PedalsInputTask::PedalsInputTask() : Task(PEDALS_INPUT_TASK_QUEUE_DEPTH_OBJS)
+PedalInputsTask::PedalInputsTask() 
+    : Task(PEDALS_INPUT_TASK_QUEUE_DEPTH_OBJS),
+    accelDmaBuffer{}, regenDmaBuffer{},
+    v_accelReading_P(0), v_accelReading_N(0),
+    v_regenReading_P(0), v_regenReading_N(0),
+    pedalInputs{}
 {
 }
 
 /**
- * @brief Initialize the PedalsInputTask
+ * @brief Initialize the PedalInputsTask
  */
-void PedalsInputTask::InitTask()
+void PedalInputsTask::InitTask()
 {
     // Make sure the task is not already initialized
-    CUBE_ASSERT(rtTaskHandle == nullptr, "Cannot initialize PedalsInput task twice");
+    CUBE_ASSERT(rtTaskHandle == nullptr, "Cannot initialize PedalInputs task twice");
 
     BaseType_t rtValue =
-        xTaskCreate((TaskFunction_t)PedalsInputTask::RunTask,
-            (const char*)"PedalsInputTask",
-            (uint16_t)PEDALS_INPUT_TASK_STACK_DEPTH_WORDS,
+        xTaskCreate((TaskFunction_t)PedalInputsTask::RunTask,
+            (const char*)"PedalInputsTask",
+            (uint16_t)PEDAL_INPUTS_TASK_STACK_DEPTH_WORDS,
             (void*)this,
-            (UBaseType_t)PEDALS_INPUT_TASK_RTOS_PRIORITY,
+            (UBaseType_t)PEDAL_INPUTS_TASK_RTOS_PRIORITY,
             (TaskHandle_t*)&rtTaskHandle);
 
-    CUBE_ASSERT(rtValue == pdPASS, "PedalsInputTask::InitTask() - xTaskCreate() failed");
+    CUBE_ASSERT(rtValue == pdPASS, "PedalInputsTask::InitTask() - xTaskCreate() failed");
 }
 
 /**
- * @brief Instance Run loop for the PedalsInput Task. Reads ADC DMA buffers and processes into pedal percentage.
+ * @brief Instance Run loop for the PedalInputs Task. Reads ADC DMA buffers and processes into pedal percentage.
  * @param pvParams RTOS Passed void parameters, contains a pointer to the object instance, should not be used
  */
-void PedalsInputTask::Run(void * pvParams)
+void PedalInputsTask::Run(void * pvParams)
 {
     // HAL Status Handlers for Debugging
     HAL_StatusTypeDef statusA;
@@ -82,10 +87,25 @@ void PedalsInputTask::Run(void * pvParams)
         v_accelReading_N = accelDmaBuffer[1];
         // CUBE_PRINT("%u %u | %u %u\r\n", v_accelReading_P, v_accelReading_N, v_regenReading_P, v_regenReading_N);
 
-        accelPercentage = MapAdcToPercent(v_accelReading_P, PEDAL_MIN, PEDAL_MAX);
-        regenPercentage = MapAdcToPercent(v_regenReading_P, PEDAL_MIN, PEDAL_MAX);
-        // CUBE_PRINT("ACCEL: %u%%  REGEN: %u%%\r\n", accelPercentage, regenPercentage);
+        pedalInputs.accelPercentage = MapAdcToPercent(v_accelReading_P, PEDAL_MIN, PEDAL_MAX);
+        pedalInputs.regenPercentage = MapAdcToPercent(v_regenReading_P, PEDAL_MIN, PEDAL_MAX);
+        // CUBE_PRINT("ACCEL: %u%%  REGEN: %u%%\r\n", pedalInputs.accelPercentage, pedalInputs.regenPercentage);
 
         osDelay(50);
     }
+}
+
+
+/**
+ * @brief Getter function that returns a copy of pedalInputs state via reference while being thread-safe.
+ * @param out reference to inputs state to copy into.
+ * @return True or False if copy was successful.
+ */
+bool GetPedalPercentages(PedalInputs& out) {
+    if ( !pedalInputsMutex.Lock(10) ) {
+        return false;
+    } 
+    out = pedalInputs;
+    pedalInputsMutex.Unlock();
+    return true;
 }
